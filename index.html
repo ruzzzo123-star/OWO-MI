@@ -93,10 +93,59 @@
         .period-tab { padding: 8px 16px; border: 1px solid #ddd; background: white; border-radius: 20px; cursor: pointer; font-size: 13px; }
         .period-tab.active { background: #6366f1; color: white; border-color: #6366f1; }
         
+        /* Search & Filter */
+        .search-bar { display: flex; gap: 8px; margin-bottom: 16px; }
+        .search-input { flex: 1; padding: 12px 16px; border: 1px solid #ddd; border-radius: 10px; font-size: 14px; }
+        .search-input:focus { outline: none; border-color: #8b5cf6; }
+        .filter-btn { padding: 12px 16px; border: 1px solid #ddd; border-radius: 10px; background: white; cursor: pointer; font-size: 13px; }
+        .filter-btn.active { background: #6366f1; color: white; border-color: #6366f1; }
+        .filter-tabs { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+        .filter-tab { padding: 8px 14px; border: 1px solid #ddd; border-radius: 20px; background: white; cursor: pointer; font-size: 13px; }
+        .filter-tab.active { background: #6366f1; color: white; border-color: #6366f1; }
+        
+        /* Edit/Delete */
+        .card-menu { position: relative; }
+        .menu-btn { background: none; border: none; font-size: 18px; cursor: pointer; padding: 4px 8px; color: #999; }
+        .menu-btn:hover { color: #333; }
+        .btn-edit { background: #e0f2fe; color: #0369a1; padding: 10px; font-size: 14px; }
+        .btn-delete { background: #fee2e2; color: #dc2626; padding: 10px; font-size: 14px; }
+        .btn-export { background: #f0fdf4; color: #166534; padding: 10px 16px; font-size: 14px; }
+        
+        /* Dark Mode */
+        body.dark { background: #1a1a2e; color: #eee; }
+        body.dark .header { background: linear-gradient(135deg, #4338ca, #6d28d9); }
+        body.dark .stat, body.dark .card, body.dark .report-section { background: #16213e; box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+        body.dark .stat-label, body.dark .card-desc, body.dark .card-date, body.dark .report-label, body.dark .rank-detail { color: #888; }
+        body.dark .stat-value, body.dark .card-name, body.dark .section-title, body.dark .report-title, body.dark .report-value, body.dark .rank-name { color: #eee; }
+        body.dark .form-input, body.dark .search-input { background: #16213e; border-color: #333; color: #eee; }
+        body.dark .modal-box { background: #16213e; }
+        body.dark .modal-header { border-color: #333; color: #eee; }
+        body.dark .modal-footer { border-color: #333; }
+        body.dark .nav { background: #16213e; border-color: #333; }
+        body.dark .filter-tab { background: #16213e; border-color: #333; color: #888; }
+        body.dark .btn-secondary { background: #16213e; border-color: #6366f1; }
+        body.dark .empty { color: #666; }
+        body.dark .auth-box { background: #16213e; }
+        body.dark .auth-title, body.dark .form-label { color: #eee; }
+        body.dark .tabs { background: #0f0f23; }
+        body.dark .tab { color: #888; }
+        body.dark .tab.active { background: #16213e; color: #eee; }
+        .dark-toggle { background: rgba(255,255,255,0.2); border: none; color: white; padding: 8px 12px; border-radius: 20px; cursor: pointer; font-size: 16px; margin-right: 8px; }
+        
         .actions { display: flex; gap: 12px; margin-bottom: 24px; }
         .actions .btn { flex: 1; }
         
         .section-title { font-size: 17px; font-weight: 600; margin-bottom: 12px; color: #333; }
+        
+        /* Search & Filter */
+        .search-bar { display: flex; gap: 8px; margin-bottom: 16px; }
+        .search-input { flex: 1; padding: 12px 16px; border: 1px solid #ddd; border-radius: 10px; font-size: 14px; }
+        .search-input:focus { outline: none; border-color: #8b5cf6; }
+        .filter-btn { padding: 12px 16px; border: 1px solid #ddd; border-radius: 10px; background: white; cursor: pointer; font-size: 13px; }
+        .filter-btn.active { background: #6366f1; color: white; border-color: #6366f1; }
+        .filter-tabs { display: flex; gap: 8px; margin-bottom: 16px; overflow-x: auto; }
+        .filter-tab { padding: 8px 14px; border: 1px solid #ddd; border-radius: 20px; background: white; cursor: pointer; font-size: 12px; white-space: nowrap; }
+        .filter-tab.active { background: #6366f1; color: white; border-color: #6366f1; }
         
         .card { background: white; padding: 16px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 12px; }
         .card-header { display: flex; justify-content: space-between; }
@@ -132,6 +181,29 @@
         
         .loading { text-align: center; padding: 60px; color: #666; }
         .hidden { display: none !important; }
+        
+        /* Charts */
+        .chart-container { background: white; border-radius: 12px; padding: 16px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .chart-title { font-weight: 600; margin-bottom: 12px; color: #333; }
+        .bar-chart { display: flex; align-items: flex-end; gap: 8px; height: 120px; padding-top: 10px; }
+        .bar-group { flex: 1; display: flex; flex-direction: column; align-items: center; }
+        .bar { width: 100%; border-radius: 4px 4px 0 0; transition: height 0.3s; min-height: 4px; }
+        .bar-collected { background: linear-gradient(to top, #16a34a, #22c55e); }
+        .bar-outstanding { background: linear-gradient(to top, #dc2626, #ef4444); }
+        .bar-label { font-size: 10px; color: #666; margin-top: 6px; text-align: center; }
+        .chart-legend { display: flex; gap: 16px; margin-top: 12px; justify-content: center; }
+        .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #666; }
+        .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+        
+        /* Payment History */
+        .payment-list { max-height: 200px; overflow-y: auto; }
+        .payment-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }
+        .payment-item:last-child { border-bottom: none; }
+        .payment-date { font-size: 12px; color: #666; }
+        .payment-amount { font-weight: 600; color: #16a34a; }
+        
+        /* Recurring */
+        .recurring-badge { background: #dbeafe; color: #1d4ed8; font-size: 10px; padding: 2px 6px; border-radius: 10px; margin-left: 8px; }
     </style>
 </head>
 <body>
@@ -148,7 +220,12 @@
             customers: [],
             invoices: [],
             activeTab: 'dashboard',
-            loading: true
+            loading: true,
+            searchQuery: '',
+            filterStatus: 'all',
+            businessProfile: JSON.parse(localStorage.getItem('owomi_business') || '{}'),
+            paymentHistory: JSON.parse(localStorage.getItem('owomi_payments') || '[]'),
+            recurringTemplates: JSON.parse(localStorage.getItem('owomi_recurring') || '[]')
         };
 
         // ========== AUTH HELPERS ==========
@@ -258,6 +335,16 @@
             });
             
             invoice.amount_paid = newPaid;
+            
+            // Track payment history
+            const payment = {
+                id: Date.now().toString(),
+                invoiceId: invoiceId,
+                amount: amount,
+                date: new Date().toISOString()
+            };
+            state.paymentHistory.push(payment);
+            localStorage.setItem('owomi_payments', JSON.stringify(state.paymentHistory));
         }
 
         // ========== HELPERS ==========
@@ -273,6 +360,64 @@
             if (invoice.amount_paid >= invoice.amount) return 'paid';
             if (new Date(invoice.due_date) < new Date()) return 'overdue';
             return 'pending';
+        }
+
+        // Recurring Invoice Helpers
+        function getNextDueDate(template) {
+            const start = new Date(template.startDate);
+            const today = new Date();
+            let next = new Date(start);
+            
+            while (next <= today) {
+                switch(template.frequency) {
+                    case 'weekly':
+                        next.setDate(next.getDate() + 7);
+                        break;
+                    case 'biweekly':
+                        next.setDate(next.getDate() + 14);
+                        break;
+                    case 'monthly':
+                        next.setMonth(next.getMonth() + 1);
+                        break;
+                    case 'quarterly':
+                        next.setMonth(next.getMonth() + 3);
+                        break;
+                    case 'yearly':
+                        next.setFullYear(next.getFullYear() + 1);
+                        break;
+                }
+            }
+            return next.toISOString().split('T')[0];
+        }
+
+        function getDueRecurringInvoices() {
+            const today = new Date();
+            return state.recurringTemplates.filter(tmpl => {
+                if (!tmpl.active) return false;
+                const nextDue = new Date(getNextDueDate(tmpl));
+                const daysDiff = Math.floor((nextDue - today) / (1000 * 60 * 60 * 24));
+                return daysDiff <= 3; // Due within 3 days
+            });
+        }
+
+        async function generateFromRecurring(templateId) {
+            const tmpl = state.recurringTemplates.find(t => t.id === templateId);
+            if (!tmpl) return;
+
+            const dueDate = getNextDueDate(tmpl);
+            
+            try {
+                await addInvoice(tmpl.customerId, `${tmpl.description} (Auto-generated)`, tmpl.amount, dueDate);
+                
+                // Update last generated date
+                tmpl.lastGenerated = new Date().toISOString();
+                localStorage.setItem('owomi_recurring', JSON.stringify(state.recurringTemplates));
+                
+                render();
+                alert('Invoice generated successfully!');
+            } catch (err) {
+                alert('Error generating invoice: ' + err.message);
+            }
         }
 
         // ========== RENDER ==========
@@ -347,6 +492,8 @@
                             <p>${state.user.email}</p>
                         </div>
                         <div>
+                            <button class="btn-ai" id="btn-settings">⚙️</button>
+                            <button class="dark-toggle" id="btn-dark">${localStorage.getItem('owomi_dark') === '1' ? '☀️' : '🌙'}</button>
                             <button class="btn-ai" id="btn-ai">🤖 AI</button>
                             <button class="btn-logout" id="btn-logout">Logout</button>
                         </div>
@@ -357,13 +504,14 @@
                     ${state.activeTab === 'dashboard' ? renderDashboard(outstanding, collected, overdueAmt, overdue) : ''}
                     ${state.activeTab === 'invoices' ? renderInvoices() : ''}
                     ${state.activeTab === 'customers' ? renderCustomers() : ''}
+                    ${state.activeTab === 'recurring' ? renderRecurring() : ''}
                     ${state.activeTab === 'reports' ? renderReports() : ''}
                 </main>
 
                 <nav class="nav">
                     <button class="nav-item ${state.activeTab === 'dashboard' ? 'active' : ''}" data-tab="dashboard">
                         <div class="nav-icon">📊</div>
-                        <div class="nav-label">Dashboard</div>
+                        <div class="nav-label">Home</div>
                     </button>
                     <button class="nav-item ${state.activeTab === 'invoices' ? 'active' : ''}" data-tab="invoices">
                         <div class="nav-icon">📄</div>
@@ -372,6 +520,10 @@
                     <button class="nav-item ${state.activeTab === 'customers' ? 'active' : ''}" data-tab="customers">
                         <div class="nav-icon">👥</div>
                         <div class="nav-label">Customers</div>
+                    </button>
+                    <button class="nav-item ${state.activeTab === 'recurring' ? 'active' : ''}" data-tab="recurring">
+                        <div class="nav-icon">🔄</div>
+                        <div class="nav-label">Recurring</div>
                     </button>
                     <button class="nav-item ${state.activeTab === 'reports' ? 'active' : ''}" data-tab="reports">
                         <div class="nav-icon">📈</div>
@@ -409,25 +561,120 @@
                     <button class="btn btn-secondary" id="btn-new-customer">+ Customer</button>
                 </div>
 
+                ${renderMonthlyChart()}
+
                 <div class="section-title">Recent Invoices</div>
                 ${state.invoices.length === 0 ? '<div class="empty">No invoices yet. Create your first one!</div>' : 
                     state.invoices.slice(0, 5).map(inv => renderInvoiceCard(inv)).join('')}
             `;
         }
 
-        function renderInvoices() {
+        function renderMonthlyChart() {
+            // Get last 6 months data
+            const months = [];
+            const now = new Date();
+            for (let i = 5; i >= 0; i--) {
+                const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+                months.push({
+                    label: d.toLocaleDateString('en-US', { month: 'short' }),
+                    year: d.getFullYear(),
+                    month: d.getMonth(),
+                    collected: 0,
+                    invoiced: 0
+                });
+            }
+
+            // Calculate amounts per month
+            state.invoices.forEach(inv => {
+                const invDate = new Date(inv.created_at);
+                months.forEach(m => {
+                    if (invDate.getFullYear() === m.year && invDate.getMonth() === m.month) {
+                        m.invoiced += Number(inv.amount);
+                        m.collected += Number(inv.amount_paid);
+                    }
+                });
+            });
+
+            // Find max for scaling
+            const maxVal = Math.max(...months.map(m => Math.max(m.collected, m.invoiced)), 1);
+
             return `
-                <button class="btn btn-primary" id="btn-new-invoice" style="margin-bottom: 20px;">+ New Invoice</button>
-                ${state.invoices.length === 0 ? '<div class="empty">No invoices yet.</div>' : 
-                    state.invoices.map(inv => renderInvoiceCard(inv)).join('')}
+                <div class="chart-container">
+                    <div class="chart-title">📊 Last 6 Months</div>
+                    <div class="bar-chart">
+                        ${months.map(m => `
+                            <div class="bar-group">
+                                <div class="bar bar-collected" style="height: ${(m.collected / maxVal) * 100}px;" title="Collected: ${formatNaira(m.collected)}"></div>
+                                <div class="bar-label">${m.label}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="chart-legend">
+                        <div class="legend-item"><div class="legend-dot" style="background: #16a34a;"></div> Collected</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderInvoices() {
+            // Filter invoices
+            let filtered = state.invoices;
+            
+            // Apply search
+            if (state.searchQuery) {
+                const query = state.searchQuery.toLowerCase();
+                filtered = filtered.filter(inv => {
+                    const cust = state.customers.find(c => c.id === inv.customer_id);
+                    return inv.description.toLowerCase().includes(query) || 
+                           (cust && cust.name.toLowerCase().includes(query));
+                });
+            }
+            
+            // Apply status filter
+            if (state.filterStatus !== 'all') {
+                filtered = filtered.filter(inv => getStatus(inv) === state.filterStatus);
+            }
+
+            return `
+                <button class="btn btn-primary" id="btn-new-invoice" style="margin-bottom: 16px;">+ New Invoice</button>
+                
+                <div class="search-bar">
+                    <input type="text" class="search-input" id="search-invoices" placeholder="Search invoices..." value="${state.searchQuery}">
+                </div>
+                
+                <div class="filter-tabs">
+                    <button class="filter-tab ${state.filterStatus === 'all' ? 'active' : ''}" data-filter="all">All</button>
+                    <button class="filter-tab ${state.filterStatus === 'pending' ? 'active' : ''}" data-filter="pending">Pending</button>
+                    <button class="filter-tab ${state.filterStatus === 'overdue' ? 'active' : ''}" data-filter="overdue">Overdue</button>
+                    <button class="filter-tab ${state.filterStatus === 'paid' ? 'active' : ''}" data-filter="paid">Paid</button>
+                </div>
+                
+                ${filtered.length === 0 ? '<div class="empty">No invoices found.</div>' : 
+                    filtered.map(inv => renderInvoiceCard(inv)).join('')}
             `;
         }
 
         function renderCustomers() {
+            // Filter customers
+            let filtered = state.customers;
+            
+            if (state.searchQuery) {
+                const query = state.searchQuery.toLowerCase();
+                filtered = filtered.filter(cust => 
+                    cust.name.toLowerCase().includes(query) || 
+                    cust.phone.includes(query)
+                );
+            }
+
             return `
-                <button class="btn btn-primary" id="btn-new-customer" style="margin-bottom: 20px;">+ Add Customer</button>
-                ${state.customers.length === 0 ? '<div class="empty">No customers yet.</div>' : 
-                    state.customers.map(cust => {
+                <button class="btn btn-primary" id="btn-new-customer" style="margin-bottom: 16px;">+ Add Customer</button>
+                
+                <div class="search-bar">
+                    <input type="text" class="search-input" id="search-customers" placeholder="Search customers..." value="${state.searchQuery}">
+                </div>
+                
+                ${filtered.length === 0 ? '<div class="empty">No customers found.</div>' : 
+                    filtered.map(cust => {
                         const custInvoices = state.invoices.filter(i => i.customer_id === cust.id);
                         const owed = custInvoices.reduce((sum, i) => sum + (i.amount - i.amount_paid), 0);
                         return `
@@ -440,6 +687,10 @@
                                     <div class="card-amount" style="color: ${owed > 0 ? '#dc2626' : '#16a34a'}">
                                         ${owed > 0 ? 'Owes ' + formatNaira(owed) : 'Clear ✓'}
                                     </div>
+                                </div>
+                                <div class="card-actions">
+                                    <button class="btn btn-edit" data-edit-customer="${cust.id}">✏️ Edit</button>
+                                    <button class="btn btn-delete" data-delete-customer="${cust.id}">🗑️ Delete</button>
                                 </div>
                             </div>
                         `;
@@ -496,6 +747,8 @@
 
             return `
                 <div class="section-title">📈 Business Reports</div>
+                
+                <button class="btn btn-export" id="btn-export" style="margin-bottom: 16px;">📥 Export to CSV</button>
 
                 <!-- Summary Stats -->
                 <div class="report-section">
@@ -587,6 +840,82 @@
                             </div>
                         `).join('')}
                 </div>
+
+                <!-- Recurring Invoices -->
+                <div class="report-section">
+                    <div class="report-title">🔄 Recurring Templates</div>
+                    ${state.recurringTemplates.length === 0 ? 
+                        '<div style="color: #999; font-size: 14px; padding: 10px 0;">No recurring invoices set up. Create an invoice and check "Make this recurring" to get started.</div>' :
+                        state.recurringTemplates.map(t => {
+                            const cust = state.customers.find(c => c.id === t.customerId);
+                            return `
+                                <div class="customer-rank">
+                                    <div class="rank-info" style="flex: 1;">
+                                        <div class="rank-name">${cust?.name || 'Unknown'}</div>
+                                        <div class="rank-detail">${t.description} • Day ${t.dayOfMonth} monthly</div>
+                                    </div>
+                                    <div class="rank-amount">${formatNaira(t.amount)}</div>
+                                    <button class="btn btn-delete" data-delete-recurring="${t.id}" style="margin-left: 8px; padding: 6px 10px;">🗑️</button>
+                                </div>
+                            `;
+                        }).join('')}
+                </div>
+            `;
+        }
+
+        function renderRecurring() {
+            const templates = state.recurringTemplates;
+            
+            return `
+                <div class="section-title">🔄 Recurring Invoices</div>
+                <p style="font-size: 13px; color: #666; margin-bottom: 16px;">Automatically generate invoices on a schedule</p>
+                
+                <button class="btn btn-primary" id="btn-new-recurring" style="margin-bottom: 16px;">+ New Recurring Invoice</button>
+                
+                ${templates.length === 0 ? 
+                    '<div class="empty">No recurring invoices set up yet.<br>Create one to auto-generate invoices!</div>' :
+                    templates.map(tmpl => {
+                        const cust = state.customers.find(c => c.id === tmpl.customerId);
+                        const nextDue = getNextDueDate(tmpl);
+                        return `
+                            <div class="card">
+                                <div class="card-header">
+                                    <div>
+                                        <div class="card-name">${cust?.name || 'Unknown Customer'} <span class="recurring-badge">${tmpl.frequency}</span></div>
+                                        <div class="card-desc">${tmpl.description}</div>
+                                        <div class="card-date">Next: ${formatDate(nextDue)} • Started: ${formatDate(tmpl.startDate)}</div>
+                                    </div>
+                                    <div class="card-amount">
+                                        ${formatNaira(tmpl.amount)}
+                                        <div class="badge ${tmpl.active ? 'badge-paid' : 'badge-pending'}">${tmpl.active ? 'Active' : 'Paused'}</div>
+                                    </div>
+                                </div>
+                                <div class="card-actions">
+                                    <button class="btn btn-success" data-generate-recurring="${tmpl.id}">⚡ Generate Now</button>
+                                    <button class="btn ${tmpl.active ? 'btn-pdf' : 'btn-whatsapp'}" data-toggle-recurring="${tmpl.id}">${tmpl.active ? '⏸️ Pause' : '▶️ Resume'}</button>
+                                    <button class="btn btn-edit" data-edit-recurring="${tmpl.id}">✏️</button>
+                                    <button class="btn btn-delete" data-delete-recurring="${tmpl.id}">🗑️</button>
+                                </div>
+                            </div>
+                        `;
+                    }).join('')
+                }
+                
+                <div class="report-section" style="margin-top: 20px;">
+                    <div class="report-title">📅 Auto-Generation Schedule</div>
+                    <p style="font-size: 13px; color: #666; margin-bottom: 12px;">
+                        Owo Mi will remind you when recurring invoices are due. Click "Generate Now" to create the invoice immediately.
+                    </p>
+                    ${getDueRecurringInvoices().length > 0 ? `
+                        <div style="background: #fef3c7; padding: 12px; border-radius: 8px; margin-top: 12px;">
+                            <strong>⚠️ ${getDueRecurringInvoices().length} recurring invoice(s) ready to generate!</strong>
+                        </div>
+                    ` : `
+                        <div style="background: #dcfce7; padding: 12px; border-radius: 8px; margin-top: 12px;">
+                            <strong>✓ All caught up! No recurring invoices due.</strong>
+                        </div>
+                    `}
+                </div>
             `;
         }
 
@@ -609,8 +938,11 @@
                     </div>
                     <div class="card-actions">
                         <button class="btn btn-pdf" data-pdf="${inv.id}">📄 PDF</button>
+                        <button class="btn btn-secondary" data-history="${inv.id}">📜 History</button>
                         ${status !== 'paid' ? `<button class="btn btn-whatsapp" data-whatsapp="${inv.id}">💬 WhatsApp</button>` : ''}
                         ${status !== 'paid' ? `<button class="btn btn-success" data-pay="${inv.id}">💰 Payment</button>` : ''}
+                        <button class="btn btn-edit" data-edit-invoice="${inv.id}">✏️</button>
+                        <button class="btn btn-delete" data-delete-invoice="${inv.id}">🗑️</button>
                     </div>
                 </div>
             `;
@@ -726,6 +1058,95 @@
             document.querySelectorAll('[data-whatsapp]').forEach(btn => {
                 btn.onclick = () => sendWhatsAppReminder(btn.dataset.whatsapp);
             });
+
+            // Search
+            document.getElementById('search-invoices')?.addEventListener('input', (e) => {
+                state.searchQuery = e.target.value;
+                render();
+            });
+            document.getElementById('search-customers')?.addEventListener('input', (e) => {
+                state.searchQuery = e.target.value;
+                render();
+            });
+
+            // Filter tabs
+            document.querySelectorAll('[data-filter]').forEach(btn => {
+                btn.onclick = () => {
+                    state.filterStatus = btn.dataset.filter;
+                    render();
+                };
+            });
+
+            // Edit Customer
+            document.querySelectorAll('[data-edit-customer]').forEach(btn => {
+                btn.onclick = () => showEditCustomerModal(btn.dataset.editCustomer);
+            });
+
+            // Delete Customer
+            document.querySelectorAll('[data-delete-customer]').forEach(btn => {
+                btn.onclick = () => deleteCustomer(btn.dataset.deleteCustomer);
+            });
+
+            // Edit Invoice
+            document.querySelectorAll('[data-edit-invoice]').forEach(btn => {
+                btn.onclick = () => showEditInvoiceModal(btn.dataset.editInvoice);
+            });
+
+            // Delete Invoice
+            document.querySelectorAll('[data-delete-invoice]').forEach(btn => {
+                btn.onclick = () => deleteInvoice(btn.dataset.deleteInvoice);
+            });
+
+            // Dark Mode Toggle
+            document.getElementById('btn-dark')?.addEventListener('click', () => {
+                document.body.classList.toggle('dark');
+                const isDark = document.body.classList.contains('dark');
+                localStorage.setItem('owomi_dark', isDark ? '1' : '0');
+                document.getElementById('btn-dark').textContent = isDark ? '☀️' : '🌙';
+            });
+
+            // Export CSV
+            document.getElementById('btn-export')?.addEventListener('click', exportToCSV);
+
+            // Settings
+            document.getElementById('btn-settings')?.addEventListener('click', showSettingsModal);
+
+            // Payment History
+            document.querySelectorAll('[data-history]').forEach(btn => {
+                btn.onclick = () => showPaymentHistoryModal(btn.dataset.history);
+            });
+
+            // Recurring Invoice Events
+            document.getElementById('btn-new-recurring')?.addEventListener('click', showNewRecurringModal);
+            
+            document.querySelectorAll('[data-generate-recurring]').forEach(btn => {
+                btn.onclick = () => generateFromRecurring(btn.dataset.generateRecurring);
+            });
+            
+            document.querySelectorAll('[data-toggle-recurring]').forEach(btn => {
+                btn.onclick = () => {
+                    const tmpl = state.recurringTemplates.find(t => t.id === btn.dataset.toggleRecurring);
+                    if (tmpl) {
+                        tmpl.active = !tmpl.active;
+                        localStorage.setItem('owomi_recurring', JSON.stringify(state.recurringTemplates));
+                        render();
+                    }
+                };
+            });
+            
+            document.querySelectorAll('[data-edit-recurring]').forEach(btn => {
+                btn.onclick = () => showEditRecurringModal(btn.dataset.editRecurring);
+            });
+            
+            document.querySelectorAll('[data-delete-recurring]').forEach(btn => {
+                btn.onclick = () => {
+                    if (confirm('Delete this recurring invoice template?')) {
+                        state.recurringTemplates = state.recurringTemplates.filter(t => t.id !== btn.dataset.deleteRecurring);
+                        localStorage.setItem('owomi_recurring', JSON.stringify(state.recurringTemplates));
+                        render();
+                    }
+                };
+            });
         }
 
         // ========== MODALS ==========
@@ -798,6 +1219,12 @@
                                 <label class="form-label">Due Date</label>
                                 <input type="date" class="form-input" id="inv-due">
                             </div>
+                            <div class="form-group">
+                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                    <input type="checkbox" id="inv-recurring">
+                                    <span class="form-label" style="margin: 0;">🔄 Make this recurring (monthly)</span>
+                                </label>
+                            </div>
                         </div>
                         <div class="modal-footer">
                             <button class="btn btn-secondary" id="modal-cancel">Cancel</button>
@@ -813,11 +1240,27 @@
                 const description = document.getElementById('inv-desc').value.trim();
                 const amount = parseFloat(document.getElementById('inv-amount').value);
                 const dueDate = document.getElementById('inv-due').value;
+                const isRecurring = document.getElementById('inv-recurring').checked;
 
                 if (!description || !amount || !dueDate) return alert('Please fill all fields');
 
                 try {
                     await addInvoice(customerId, description, amount, dueDate);
+                    
+                    // Save as recurring template
+                    if (isRecurring) {
+                        const template = {
+                            id: Date.now().toString(),
+                            customerId,
+                            description,
+                            amount,
+                            dayOfMonth: new Date(dueDate).getDate(),
+                            lastGenerated: new Date().toISOString().slice(0, 7) // YYYY-MM format
+                        };
+                        state.recurringTemplates.push(template);
+                        localStorage.setItem('owomi_recurring', JSON.stringify(state.recurringTemplates));
+                    }
+                    
                     closeModal();
                     render();
                 } catch (err) {
@@ -828,6 +1271,416 @@
 
         function closeModal() {
             document.getElementById('modal-container').innerHTML = '';
+        }
+
+        // ========== EDIT/DELETE FUNCTIONS ==========
+        function showEditCustomerModal(customerId) {
+            const cust = state.customers.find(c => c.id === customerId);
+            if (!cust) return;
+
+            document.getElementById('modal-container').innerHTML = `
+                <div class="modal">
+                    <div class="modal-box">
+                        <div class="modal-header">Edit Customer</div>
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label class="form-label">Name</label>
+                                <input type="text" class="form-input" id="edit-cust-name" value="${cust.name}">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Phone</label>
+                                <input type="text" class="form-input" id="edit-cust-phone" value="${cust.phone}">
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-secondary" id="modal-cancel">Cancel</button>
+                            <button class="btn btn-primary" id="modal-save">Save</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('modal-cancel').onclick = closeModal;
+            document.getElementById('modal-save').onclick = async () => {
+                const name = document.getElementById('edit-cust-name').value.trim();
+                const phone = document.getElementById('edit-cust-phone').value.trim();
+                if (!name || !phone) return alert('Please fill all fields');
+                
+                try {
+                    await supabaseQuery('customers', {
+                        method: 'PATCH',
+                        query: `id=eq.${customerId}`,
+                        body: { name, phone }
+                    });
+                    const idx = state.customers.findIndex(c => c.id === customerId);
+                    state.customers[idx] = { ...state.customers[idx], name, phone };
+                    closeModal();
+                    render();
+                } catch (err) {
+                    alert('Error: ' + err.message);
+                }
+            };
+        }
+
+        async function deleteCustomer(customerId) {
+            if (!confirm('Delete this customer? This will also delete all their invoices.')) return;
+            
+            try {
+                // Delete customer's invoices first
+                await supabaseQuery('invoices', {
+                    method: 'DELETE',
+                    query: `customer_id=eq.${customerId}`
+                });
+                // Delete customer
+                await supabaseQuery('customers', {
+                    method: 'DELETE',
+                    query: `id=eq.${customerId}`
+                });
+                state.customers = state.customers.filter(c => c.id !== customerId);
+                state.invoices = state.invoices.filter(i => i.customer_id !== customerId);
+                render();
+            } catch (err) {
+                alert('Error: ' + err.message);
+            }
+        }
+
+        function showEditInvoiceModal(invoiceId) {
+            const inv = state.invoices.find(i => i.id === invoiceId);
+            if (!inv) return;
+
+            document.getElementById('modal-container').innerHTML = `
+                <div class="modal">
+                    <div class="modal-box">
+                        <div class="modal-header">Edit Invoice</div>
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label class="form-label">Customer</label>
+                                <select class="form-input" id="edit-inv-customer">
+                                    ${state.customers.map(c => `<option value="${c.id}" ${c.id === inv.customer_id ? 'selected' : ''}>${c.name}</option>`).join('')}
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Description</label>
+                                <input type="text" class="form-input" id="edit-inv-desc" value="${inv.description}">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Amount (₦)</label>
+                                <input type="number" class="form-input" id="edit-inv-amount" value="${inv.amount}">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Amount Paid (₦)</label>
+                                <input type="number" class="form-input" id="edit-inv-paid" value="${inv.amount_paid}">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Due Date</label>
+                                <input type="date" class="form-input" id="edit-inv-due" value="${inv.due_date}">
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-secondary" id="modal-cancel">Cancel</button>
+                            <button class="btn btn-primary" id="modal-save">Save</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('modal-cancel').onclick = closeModal;
+            document.getElementById('modal-save').onclick = async () => {
+                const customer_id = document.getElementById('edit-inv-customer').value;
+                const description = document.getElementById('edit-inv-desc').value.trim();
+                const amount = parseFloat(document.getElementById('edit-inv-amount').value);
+                const amount_paid = parseFloat(document.getElementById('edit-inv-paid').value);
+                const due_date = document.getElementById('edit-inv-due').value;
+
+                if (!description || !amount || !due_date) return alert('Please fill all fields');
+
+                try {
+                    await supabaseQuery('invoices', {
+                        method: 'PATCH',
+                        query: `id=eq.${invoiceId}`,
+                        body: { customer_id, description, amount, amount_paid, due_date }
+                    });
+                    const idx = state.invoices.findIndex(i => i.id === invoiceId);
+                    state.invoices[idx] = { ...state.invoices[idx], customer_id, description, amount, amount_paid, due_date };
+                    closeModal();
+                    render();
+                } catch (err) {
+                    alert('Error: ' + err.message);
+                }
+            };
+        }
+
+        async function deleteInvoice(invoiceId) {
+            if (!confirm('Delete this invoice?')) return;
+            
+            try {
+                await supabaseQuery('invoices', {
+                    method: 'DELETE',
+                    query: `id=eq.${invoiceId}`
+                });
+                state.invoices = state.invoices.filter(i => i.id !== invoiceId);
+                render();
+            } catch (err) {
+                alert('Error: ' + err.message);
+            }
+        }
+
+        // ========== EXPORT CSV ==========
+        function exportToCSV() {
+            // Create CSV content
+            let csv = 'Customer,Phone,Description,Amount,Paid,Outstanding,Status,Due Date\n';
+            
+            state.invoices.forEach(inv => {
+                const cust = state.customers.find(c => c.id === inv.customer_id);
+                const status = getStatus(inv);
+                const outstanding = inv.amount - inv.amount_paid;
+                csv += `"${cust?.name || 'Unknown'}","${cust?.phone || ''}","${inv.description}",${inv.amount},${inv.amount_paid},${outstanding},${status},"${inv.due_date}"\n`;
+            });
+
+            // Download
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'owo-mi-invoices.csv';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // ========== SETTINGS ==========
+        function showSettingsModal() {
+            const profile = state.businessProfile;
+            document.getElementById('modal-container').innerHTML = `
+                <div class="modal">
+                    <div class="modal-box">
+                        <div class="modal-header">⚙️ Business Profile</div>
+                        <div class="modal-body">
+                            <p style="font-size: 13px; color: #666; margin-bottom: 16px;">This info will appear on your PDF invoices</p>
+                            <div class="form-group">
+                                <label class="form-label">Business Name</label>
+                                <input type="text" class="form-input" id="setting-name" placeholder="Your Business Name" value="${profile.name || ''}">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Phone Number</label>
+                                <input type="text" class="form-input" id="setting-phone" placeholder="Business Phone" value="${profile.phone || ''}">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Address</label>
+                                <input type="text" class="form-input" id="setting-address" placeholder="Business Address" value="${profile.address || ''}">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Bank Details (for invoices)</label>
+                                <textarea class="form-input" id="setting-bank" rows="3" placeholder="Bank Name, Account Number, Account Name">${profile.bank || ''}</textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-secondary" id="modal-cancel">Cancel</button>
+                            <button class="btn btn-primary" id="modal-save">Save</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('modal-cancel').onclick = closeModal;
+            document.getElementById('modal-save').onclick = () => {
+                state.businessProfile = {
+                    name: document.getElementById('setting-name').value.trim(),
+                    phone: document.getElementById('setting-phone').value.trim(),
+                    address: document.getElementById('setting-address').value.trim(),
+                    bank: document.getElementById('setting-bank').value.trim()
+                };
+                localStorage.setItem('owomi_business', JSON.stringify(state.businessProfile));
+                closeModal();
+                alert('Business profile saved!');
+            };
+        }
+
+        // ========== PAYMENT HISTORY ==========
+        function showPaymentHistoryModal(invoiceId) {
+            const inv = state.invoices.find(i => i.id === invoiceId);
+            const cust = state.customers.find(c => c.id === inv.customer_id);
+            const payments = state.paymentHistory.filter(p => p.invoiceId === invoiceId);
+            
+            document.getElementById('modal-container').innerHTML = `
+                <div class="modal">
+                    <div class="modal-box">
+                        <div class="modal-header">📜 Payment History</div>
+                        <div class="modal-body">
+                            <p style="margin-bottom: 12px;"><strong>${cust?.name || 'Customer'}</strong> - ${inv.description}</p>
+                            <p style="margin-bottom: 16px; font-size: 14px; color: #666;">
+                                Total: ${formatNaira(inv.amount)} | Paid: ${formatNaira(inv.amount_paid)} | Balance: ${formatNaira(inv.amount - inv.amount_paid)}
+                            </p>
+                            ${payments.length === 0 ? 
+                                '<div class="empty" style="padding: 20px;">No payments recorded yet</div>' :
+                                `<div class="payment-list">
+                                    ${payments.sort((a, b) => new Date(b.date) - new Date(a.date)).map(p => `
+                                        <div class="payment-item">
+                                            <div class="payment-date">${formatDate(p.date)}</div>
+                                            <div class="payment-amount">+${formatNaira(p.amount)}</div>
+                                        </div>
+                                    `).join('')}
+                                </div>`
+                            }
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-secondary" id="modal-close" style="flex: 1;">Close</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('modal-close').onclick = closeModal;
+        }
+
+        // ========== RECURRING INVOICE MODALS ==========
+        function showNewRecurringModal() {
+            if (state.customers.length === 0) {
+                alert('Add a customer first!');
+                showCustomerModal();
+                return;
+            }
+
+            document.getElementById('modal-container').innerHTML = `
+                <div class="modal">
+                    <div class="modal-box">
+                        <div class="modal-header">🔄 New Recurring Invoice</div>
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label class="form-label">Customer</label>
+                                <select class="form-input" id="rec-customer">
+                                    ${state.customers.map(c => `<option value="${c.id}">${c.name}</option>`).join('')}
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Description</label>
+                                <input type="text" class="form-input" id="rec-desc" placeholder="e.g. Monthly Retainer, Weekly Service">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Amount (₦)</label>
+                                <input type="number" class="form-input" id="rec-amount" placeholder="0">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Frequency</label>
+                                <select class="form-input" id="rec-frequency">
+                                    <option value="weekly">Weekly</option>
+                                    <option value="biweekly">Every 2 Weeks</option>
+                                    <option value="monthly" selected>Monthly</option>
+                                    <option value="quarterly">Quarterly (3 months)</option>
+                                    <option value="yearly">Yearly</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Start Date</label>
+                                <input type="date" class="form-input" id="rec-start" value="${new Date().toISOString().split('T')[0]}">
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-secondary" id="modal-cancel">Cancel</button>
+                            <button class="btn btn-primary" id="modal-save">Create</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('modal-cancel').onclick = closeModal;
+            document.getElementById('modal-save').onclick = () => {
+                const customerId = document.getElementById('rec-customer').value;
+                const description = document.getElementById('rec-desc').value.trim();
+                const amount = parseFloat(document.getElementById('rec-amount').value);
+                const frequency = document.getElementById('rec-frequency').value;
+                const startDate = document.getElementById('rec-start').value;
+
+                if (!description || !amount || !startDate) return alert('Please fill all fields');
+
+                const template = {
+                    id: Date.now().toString(),
+                    customerId,
+                    description,
+                    amount,
+                    frequency,
+                    startDate,
+                    active: true,
+                    createdAt: new Date().toISOString(),
+                    lastGenerated: null
+                };
+
+                state.recurringTemplates.push(template);
+                localStorage.setItem('owomi_recurring', JSON.stringify(state.recurringTemplates));
+                closeModal();
+                render();
+                alert('Recurring invoice template created!');
+            };
+        }
+
+        function showEditRecurringModal(templateId) {
+            const tmpl = state.recurringTemplates.find(t => t.id === templateId);
+            if (!tmpl) return;
+
+            document.getElementById('modal-container').innerHTML = `
+                <div class="modal">
+                    <div class="modal-box">
+                        <div class="modal-header">✏️ Edit Recurring Invoice</div>
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label class="form-label">Customer</label>
+                                <select class="form-input" id="rec-customer">
+                                    ${state.customers.map(c => `<option value="${c.id}" ${c.id === tmpl.customerId ? 'selected' : ''}>${c.name}</option>`).join('')}
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Description</label>
+                                <input type="text" class="form-input" id="rec-desc" value="${tmpl.description}">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Amount (₦)</label>
+                                <input type="number" class="form-input" id="rec-amount" value="${tmpl.amount}">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Frequency</label>
+                                <select class="form-input" id="rec-frequency">
+                                    <option value="weekly" ${tmpl.frequency === 'weekly' ? 'selected' : ''}>Weekly</option>
+                                    <option value="biweekly" ${tmpl.frequency === 'biweekly' ? 'selected' : ''}>Every 2 Weeks</option>
+                                    <option value="monthly" ${tmpl.frequency === 'monthly' ? 'selected' : ''}>Monthly</option>
+                                    <option value="quarterly" ${tmpl.frequency === 'quarterly' ? 'selected' : ''}>Quarterly (3 months)</option>
+                                    <option value="yearly" ${tmpl.frequency === 'yearly' ? 'selected' : ''}>Yearly</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Start Date</label>
+                                <input type="date" class="form-input" id="rec-start" value="${tmpl.startDate}">
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-secondary" id="modal-cancel">Cancel</button>
+                            <button class="btn btn-primary" id="modal-save">Save</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('modal-cancel').onclick = closeModal;
+            document.getElementById('modal-save').onclick = () => {
+                const customerId = document.getElementById('rec-customer').value;
+                const description = document.getElementById('rec-desc').value.trim();
+                const amount = parseFloat(document.getElementById('rec-amount').value);
+                const frequency = document.getElementById('rec-frequency').value;
+                const startDate = document.getElementById('rec-start').value;
+
+                if (!description || !amount || !startDate) return alert('Please fill all fields');
+
+                const idx = state.recurringTemplates.findIndex(t => t.id === templateId);
+                state.recurringTemplates[idx] = {
+                    ...state.recurringTemplates[idx],
+                    customerId,
+                    description,
+                    amount,
+                    frequency,
+                    startDate
+                };
+                localStorage.setItem('owomi_recurring', JSON.stringify(state.recurringTemplates));
+                closeModal();
+                render();
+            };
         }
 
         // ========== PDF GENERATION ==========
@@ -868,8 +1721,8 @@
                 </head>
                 <body>
                     <div class="header">
-                        <h1>Owo Mi 💰</h1>
-                        <p>Smart Invoice Manager</p>
+                        <h1>${state.businessProfile.name || 'Owo Mi 💰'}</h1>
+                        <p>${state.businessProfile.phone || ''} ${state.businessProfile.address ? '• ' + state.businessProfile.address : ''}</p>
                     </div>
                     
                     <div class="invoice-title">
@@ -883,11 +1736,25 @@
                             <p>${cust?.phone || ''}</p>
                         </div>
                         <div class="details-box">
+                            <h3>From</h3>
+                            <p><strong>${state.businessProfile.name || 'Your Business'}</strong></p>
+                            <p>${state.businessProfile.phone || ''}</p>
+                            <p>${state.businessProfile.address || ''}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="details">
+                        <div class="details-box">
                             <h3>Invoice Details</h3>
                             <p><strong>Invoice ID:</strong> ${inv.id.slice(0, 8).toUpperCase()}</p>
                             <p><strong>Due Date:</strong> ${formatDate(inv.due_date)}</p>
                             <p><strong>Created:</strong> ${formatDate(inv.created_at)}</p>
                         </div>
+                        ${state.businessProfile.bank ? `
+                        <div class="details-box">
+                            <h3>Payment Details</h3>
+                            <p style="white-space: pre-line;">${state.businessProfile.bank}</p>
+                        </div>` : ''}
                     </div>
                     
                     <table>
@@ -1068,6 +1935,11 @@ User question: ${userText}`
 
         // ========== INIT ==========
         async function init() {
+            // Load dark mode preference
+            if (localStorage.getItem('owomi_dark') === '1') {
+                document.body.classList.add('dark');
+            }
+
             const session = getSession();
             if (session?.access_token) {
                 state.user = session.user;
