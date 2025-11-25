@@ -73,6 +73,26 @@
         .card-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
         .card-actions .btn { flex: 1; min-width: 120px; }
         
+        /* Reports */
+        .report-section { background: white; border-radius: 12px; padding: 16px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .report-title { font-size: 16px; font-weight: 600; color: #333; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+        .report-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
+        .report-row:last-child { border-bottom: none; }
+        .report-label { color: #666; font-size: 14px; }
+        .report-value { font-weight: 600; color: #333; }
+        .report-value.green { color: #16a34a; }
+        .report-value.red { color: #dc2626; }
+        .customer-rank { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
+        .customer-rank:last-child { border-bottom: none; }
+        .rank-number { width: 24px; height: 24px; background: #6366f1; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; }
+        .rank-info { flex: 1; }
+        .rank-name { font-weight: 600; color: #333; }
+        .rank-detail { font-size: 12px; color: #999; }
+        .rank-amount { font-weight: 600; }
+        .period-tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+        .period-tab { padding: 8px 16px; border: 1px solid #ddd; background: white; border-radius: 20px; cursor: pointer; font-size: 13px; }
+        .period-tab.active { background: #6366f1; color: white; border-color: #6366f1; }
+        
         .actions { display: flex; gap: 12px; margin-bottom: 24px; }
         .actions .btn { flex: 1; }
         
@@ -337,6 +357,7 @@
                     ${state.activeTab === 'dashboard' ? renderDashboard(outstanding, collected, overdueAmt, overdue) : ''}
                     ${state.activeTab === 'invoices' ? renderInvoices() : ''}
                     ${state.activeTab === 'customers' ? renderCustomers() : ''}
+                    ${state.activeTab === 'reports' ? renderReports() : ''}
                 </main>
 
                 <nav class="nav">
@@ -351,6 +372,10 @@
                     <button class="nav-item ${state.activeTab === 'customers' ? 'active' : ''}" data-tab="customers">
                         <div class="nav-icon">👥</div>
                         <div class="nav-label">Customers</div>
+                    </button>
+                    <button class="nav-item ${state.activeTab === 'reports' ? 'active' : ''}" data-tab="reports">
+                        <div class="nav-icon">📈</div>
+                        <div class="nav-label">Reports</div>
                     </button>
                 </nav>
 
@@ -419,6 +444,149 @@
                             </div>
                         `;
                     }).join('')}
+            `;
+        }
+
+        function renderReports() {
+            // Calculate all-time stats
+            const totalInvoiced = state.invoices.reduce((sum, i) => sum + Number(i.amount), 0);
+            const totalCollected = state.invoices.reduce((sum, i) => sum + Number(i.amount_paid), 0);
+            const totalOutstanding = totalInvoiced - totalCollected;
+            const collectionRate = totalInvoiced > 0 ? ((totalCollected / totalInvoiced) * 100).toFixed(1) : 0;
+
+            // This month stats
+            const now = new Date();
+            const thisMonth = state.invoices.filter(i => {
+                const d = new Date(i.created_at);
+                return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+            });
+            const thisMonthInvoiced = thisMonth.reduce((sum, i) => sum + Number(i.amount), 0);
+            const thisMonthCollected = thisMonth.reduce((sum, i) => sum + Number(i.amount_paid), 0);
+
+            // Last month stats
+            const lastMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+            const lastMonth = state.invoices.filter(i => {
+                const d = new Date(i.created_at);
+                return d.getMonth() === lastMonthDate.getMonth() && d.getFullYear() === lastMonthDate.getFullYear();
+            });
+            const lastMonthInvoiced = lastMonth.reduce((sum, i) => sum + Number(i.amount), 0);
+            const lastMonthCollected = lastMonth.reduce((sum, i) => sum + Number(i.amount_paid), 0);
+
+            // Customer rankings - who owes the most
+            const customerDebts = state.customers.map(c => {
+                const custInvoices = state.invoices.filter(i => i.customer_id === c.id);
+                const totalOwed = custInvoices.reduce((sum, i) => sum + (Number(i.amount) - Number(i.amount_paid)), 0);
+                const totalPaid = custInvoices.reduce((sum, i) => sum + Number(i.amount_paid), 0);
+                return { ...c, totalOwed, totalPaid, invoiceCount: custInvoices.length };
+            });
+
+            const topDebtors = [...customerDebts].sort((a, b) => b.totalOwed - a.totalOwed).filter(c => c.totalOwed > 0).slice(0, 5);
+            const topPayers = [...customerDebts].sort((a, b) => b.totalPaid - a.totalPaid).filter(c => c.totalPaid > 0).slice(0, 5);
+
+            // Overdue analysis
+            const overdueInvoices = state.invoices.filter(i => getStatus(i) === 'overdue');
+            const overdueAmount = overdueInvoices.reduce((sum, i) => sum + (Number(i.amount) - Number(i.amount_paid)), 0);
+            const avgDaysOverdue = overdueInvoices.length > 0 
+                ? Math.round(overdueInvoices.reduce((sum, i) => {
+                    const dueDate = new Date(i.due_date);
+                    const today = new Date();
+                    return sum + Math.floor((today - dueDate) / (1000 * 60 * 60 * 24));
+                }, 0) / overdueInvoices.length)
+                : 0;
+
+            return `
+                <div class="section-title">📈 Business Reports</div>
+
+                <!-- Summary Stats -->
+                <div class="report-section">
+                    <div class="report-title">💰 All-Time Summary</div>
+                    <div class="report-row">
+                        <span class="report-label">Total Invoiced</span>
+                        <span class="report-value">${formatNaira(totalInvoiced)}</span>
+                    </div>
+                    <div class="report-row">
+                        <span class="report-label">Total Collected</span>
+                        <span class="report-value green">${formatNaira(totalCollected)}</span>
+                    </div>
+                    <div class="report-row">
+                        <span class="report-label">Total Outstanding</span>
+                        <span class="report-value red">${formatNaira(totalOutstanding)}</span>
+                    </div>
+                    <div class="report-row">
+                        <span class="report-label">Collection Rate</span>
+                        <span class="report-value" style="color: ${collectionRate >= 70 ? '#16a34a' : collectionRate >= 40 ? '#854d0e' : '#dc2626'}">${collectionRate}%</span>
+                    </div>
+                </div>
+
+                <!-- Monthly Comparison -->
+                <div class="report-section">
+                    <div class="report-title">📅 Monthly Comparison</div>
+                    <div class="report-row">
+                        <span class="report-label">This Month Invoiced</span>
+                        <span class="report-value">${formatNaira(thisMonthInvoiced)}</span>
+                    </div>
+                    <div class="report-row">
+                        <span class="report-label">This Month Collected</span>
+                        <span class="report-value green">${formatNaira(thisMonthCollected)}</span>
+                    </div>
+                    <div class="report-row">
+                        <span class="report-label">Last Month Invoiced</span>
+                        <span class="report-value">${formatNaira(lastMonthInvoiced)}</span>
+                    </div>
+                    <div class="report-row">
+                        <span class="report-label">Last Month Collected</span>
+                        <span class="report-value green">${formatNaira(lastMonthCollected)}</span>
+                    </div>
+                </div>
+
+                <!-- Overdue Analysis -->
+                <div class="report-section">
+                    <div class="report-title">⚠️ Overdue Analysis</div>
+                    <div class="report-row">
+                        <span class="report-label">Overdue Invoices</span>
+                        <span class="report-value red">${overdueInvoices.length}</span>
+                    </div>
+                    <div class="report-row">
+                        <span class="report-label">Overdue Amount</span>
+                        <span class="report-value red">${formatNaira(overdueAmount)}</span>
+                    </div>
+                    <div class="report-row">
+                        <span class="report-label">Avg Days Overdue</span>
+                        <span class="report-value">${avgDaysOverdue} days</span>
+                    </div>
+                </div>
+
+                <!-- Top Debtors -->
+                <div class="report-section">
+                    <div class="report-title">🔴 Top Debtors (Who Owes You)</div>
+                    ${topDebtors.length === 0 ? '<div style="color: #999; font-size: 14px; padding: 10px 0;">No outstanding debts! 🎉</div>' :
+                        topDebtors.map((c, i) => `
+                            <div class="customer-rank">
+                                <div class="rank-number">${i + 1}</div>
+                                <div class="rank-info">
+                                    <div class="rank-name">${c.name}</div>
+                                    <div class="rank-detail">${c.invoiceCount} invoices</div>
+                                </div>
+                                <div class="rank-amount red">${formatNaira(c.totalOwed)}</div>
+                            </div>
+                        `).join('')}
+                </div>
+
+                <!-- Top Payers -->
+                <div class="report-section">
+                    <div class="report-title">🟢 Best Customers (Most Paid)</div>
+                    ${topPayers.length === 0 ? '<div style="color: #999; font-size: 14px; padding: 10px 0;">No payments yet.</div>' :
+                        topPayers.map((c, i) => `
+                            <div class="customer-rank">
+                                <div class="rank-number" style="background: #16a34a;">${i + 1}</div>
+                                <div class="rank-info">
+                                    <div class="rank-name">${c.name}</div>
+                                    <div class="rank-detail">${c.invoiceCount} invoices</div>
+                                </div>
+                                <div class="rank-amount green">${formatNaira(c.totalPaid)}</div>
+                            </div>
+                        `).join('')}
+                </div>
             `;
         }
 
