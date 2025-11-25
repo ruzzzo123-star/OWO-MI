@@ -160,6 +160,8 @@
         .card-btn:active { opacity: 0.8; }
         .btn-pdf { background: #f3e8ff; color: #7c3aed; }
         .btn-whatsapp { background: #dcfce7; color: #16a34a; }
+        .btn-sms { background: #fef3c7; color: #d97706; }
+        .btn-paylink { background: #dbeafe; color: #1d4ed8; }
         .btn-pay { background: #dbeafe; color: #2563eb; }
         .btn-edit { background: #f1f5f9; color: #475569; }
         
@@ -504,7 +506,8 @@
             filterStatus: 'all',
             businessProfile: JSON.parse(localStorage.getItem('owomi_business') || '{}'),
             paymentHistory: JSON.parse(localStorage.getItem('owomi_payments') || '[]'),
-            recurringTemplates: JSON.parse(localStorage.getItem('owomi_recurring') || '[]')
+            recurringTemplates: JSON.parse(localStorage.getItem('owomi_recurring') || '[]'),
+            apiKeys: JSON.parse(localStorage.getItem('owomi_apikeys') || '{}')
         };
 
         // ========== AUTH ==========
@@ -787,6 +790,8 @@
         function renderInvoiceCard(inv) {
             const cust = state.customers.find(c => c.id === inv.customer_id);
             const status = getStatus(inv);
+            const hasTermii = !!state.apiKeys.termiiKey;
+            const hasPaystack = !!state.apiKeys.paystackPublic;
             return `
                 <div class="card">
                     <div class="card-top">
@@ -803,7 +808,9 @@
                     <div class="card-actions">
                         <button class="card-btn btn-pdf" data-pdf="${inv.id}">📄</button>
                         ${status !== 'paid' ? `<button class="card-btn btn-whatsapp" data-whatsapp="${inv.id}">💬</button>` : ''}
-                        ${status !== 'paid' ? `<button class="card-btn btn-pay" data-pay="${inv.id}">💰 Pay</button>` : ''}
+                        ${status !== 'paid' && hasTermii ? `<button class="card-btn btn-sms" data-sms="${inv.id}">📱</button>` : ''}
+                        ${status !== 'paid' && hasPaystack ? `<button class="card-btn btn-paylink" data-paylink="${inv.id}">💳 Pay Link</button>` : ''}
+                        ${status !== 'paid' ? `<button class="card-btn btn-pay" data-pay="${inv.id}">💰</button>` : ''}
                         <button class="card-btn btn-edit" data-edit-inv="${inv.id}">✏️</button>
                     </div>
                 </div>
@@ -974,6 +981,7 @@
 
         function renderSettingsPage() {
             const p = state.businessProfile;
+            const k = state.apiKeys;
             return `
                 <button class="back-btn" data-back>← Back</button>
                 <div class="section-title" style="margin-bottom: 16px;">⚙️ Business Profile</div>
@@ -994,7 +1002,32 @@
                     <label class="form-label">Bank Details</label>
                     <textarea class="form-input" id="set-bank" rows="3" placeholder="Bank Name&#10;Account Number&#10;Account Name">${p.bank || ''}</textarea>
                 </div>
-                <button class="btn btn-primary" id="btn-save-settings">Save Settings</button>
+
+                <div class="section-title" style="margin: 24px 0 16px;">🔌 Integrations</div>
+                
+                <div class="report-card" style="margin-bottom:16px;">
+                    <div class="report-title">📱 SMS Reminders (Termii)</div>
+                    <p style="color:#666;font-size:13px;margin-bottom:12px;">Send SMS reminders to customers. <a href="https://termii.com" target="_blank" style="color:#6366f1;">Sign up at termii.com</a></p>
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label class="form-label">Termii API Key</label>
+                        <input type="password" class="form-input" id="set-termii" value="${k.termiiKey || ''}" placeholder="Enter your Termii API key">
+                    </div>
+                </div>
+
+                <div class="report-card" style="margin-bottom:16px;">
+                    <div class="report-title">💳 Payment Links (Paystack)</div>
+                    <p style="color:#666;font-size:13px;margin-bottom:12px;">Let customers pay online. <a href="https://paystack.com" target="_blank" style="color:#6366f1;">Sign up at paystack.com</a></p>
+                    <div class="form-group" style="margin-bottom:12px;">
+                        <label class="form-label">Paystack Public Key</label>
+                        <input type="text" class="form-input" id="set-paystack-public" value="${k.paystackPublic || ''}" placeholder="pk_live_xxxxx or pk_test_xxxxx">
+                    </div>
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label class="form-label">Paystack Secret Key</label>
+                        <input type="password" class="form-input" id="set-paystack-secret" value="${k.paystackSecret || ''}" placeholder="sk_live_xxxxx or sk_test_xxxxx">
+                    </div>
+                </div>
+
+                <button class="btn btn-primary" id="btn-save-settings">Save All Settings</button>
             `;
         }
 
@@ -1069,6 +1102,8 @@
             // Invoice Actions
             document.querySelectorAll('[data-pdf]').forEach(btn => { btn.onclick = () => generatePDF(btn.dataset.pdf); });
             document.querySelectorAll('[data-whatsapp]').forEach(btn => { btn.onclick = () => sendWhatsApp(btn.dataset.whatsapp); });
+            document.querySelectorAll('[data-sms]').forEach(btn => { btn.onclick = () => sendSMS(btn.dataset.sms); });
+            document.querySelectorAll('[data-paylink]').forEach(btn => { btn.onclick = () => generatePaymentLink(btn.dataset.paylink); });
             document.querySelectorAll('[data-pay]').forEach(btn => { btn.onclick = () => showPaymentModal(btn.dataset.pay); });
             document.querySelectorAll('[data-edit-inv]').forEach(btn => { btn.onclick = () => showEditInvoiceModal(btn.dataset.editInv); });
 
@@ -1406,6 +1441,137 @@
             window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
         }
 
+        async function sendSMS(invoiceId) {
+            const inv = state.invoices.find(i => i.id === invoiceId);
+            const cust = state.customers.find(c => c.id === inv.customer_id);
+            const owed = inv.amount - inv.amount_paid;
+            
+            if (!state.apiKeys.termiiKey) {
+                alert('Please add your Termii API key in Settings first!');
+                return;
+            }
+
+            let phone = cust?.phone?.replace(/\s/g, '') || '';
+            if (phone.startsWith('0')) phone = '234' + phone.slice(1);
+            if (!phone.startsWith('234')) phone = '234' + phone;
+
+            const message = `Hi ${cust?.name}, reminder: Your invoice of ${formatNaira(owed)} for "${inv.description}" is due ${formatDate(inv.due_date)}. Please pay promptly. - ${state.businessProfile.name || 'Owo Mi'}`;
+
+            try {
+                const btn = document.querySelector(`[data-sms="${invoiceId}"]`);
+                if (btn) btn.textContent = '⏳';
+
+                const res = await fetch('https://api.ng.termii.com/api/sms/send', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        to: phone,
+                        from: 'N-Alert',
+                        sms: message,
+                        type: 'plain',
+                        channel: 'dnd',
+                        api_key: state.apiKeys.termiiKey
+                    })
+                });
+
+                const data = await res.json();
+                
+                if (data.code === 'ok' || data.message_id) {
+                    alert(`✅ SMS sent to ${cust?.name}!`);
+                } else {
+                    throw new Error(data.message || 'SMS failed');
+                }
+            } catch (err) {
+                alert('❌ SMS Error: ' + err.message);
+            }
+            render();
+        }
+
+        async function generatePaymentLink(invoiceId) {
+            const inv = state.invoices.find(i => i.id === invoiceId);
+            const cust = state.customers.find(c => c.id === inv.customer_id);
+            const owed = inv.amount - inv.amount_paid;
+            
+            if (!state.apiKeys.paystackSecret) {
+                alert('Please add your Paystack keys in Settings first!');
+                return;
+            }
+
+            try {
+                const btn = document.querySelector(`[data-paylink="${invoiceId}"]`);
+                if (btn) btn.textContent = '⏳';
+
+                // Create payment link via Paystack API
+                const res = await fetch('https://api.paystack.co/transaction/initialize', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${state.apiKeys.paystackSecret}`
+                    },
+                    body: JSON.stringify({
+                        email: `${cust?.phone || 'customer'}@owomi.app`,
+                        amount: Math.round(owed * 100), // Paystack uses kobo
+                        currency: 'NGN',
+                        reference: `owomi_${inv.id}_${Date.now()}`,
+                        callback_url: window.location.href,
+                        metadata: {
+                            invoice_id: inv.id,
+                            customer_name: cust?.name,
+                            description: inv.description
+                        }
+                    })
+                });
+
+                const data = await res.json();
+                
+                if (data.status && data.data?.authorization_url) {
+                    // Show modal with payment link
+                    showPaymentLinkModal(data.data.authorization_url, cust?.name, owed, cust?.phone);
+                } else {
+                    throw new Error(data.message || 'Failed to create payment link');
+                }
+            } catch (err) {
+                alert('❌ Payment Link Error: ' + err.message);
+                render();
+            }
+        }
+
+        function showPaymentLinkModal(url, customerName, amount, phone) {
+            const whatsappMsg = `Hi ${customerName}! Here's your payment link for ${formatNaira(amount)}:\n\n${url}\n\nClick to pay securely with card or bank transfer. Thank you!\n- ${state.businessProfile.name || 'Owo Mi'}`;
+            let formattedPhone = phone?.replace(/\s/g, '') || '';
+            if (formattedPhone.startsWith('0')) formattedPhone = '234' + formattedPhone.slice(1);
+
+            document.getElementById('modal-container').innerHTML = `
+                <div class="modal">
+                    <div class="modal-box">
+                        <div class="modal-header">💳 Payment Link Created<button class="modal-close" id="modal-close">×</button></div>
+                        <div class="modal-body">
+                            <p style="margin-bottom:16px;color:#16a34a;font-weight:600;">✅ Payment link ready for ${customerName}!</p>
+                            <p style="margin-bottom:12px;color:#666;">Amount: <strong>${formatNaira(amount)}</strong></p>
+                            
+                            <div style="background:#f5f5f5;padding:12px;border-radius:8px;margin-bottom:16px;word-break:break-all;font-size:13px;">
+                                ${url}
+                            </div>
+
+                            <button class="btn btn-primary" id="btn-copy-link" style="margin-bottom:12px;">📋 Copy Link</button>
+                            <button class="btn btn-whatsapp-send" id="btn-send-whatsapp" style="background:#25D366;color:white;width:100%;padding:16px;border:none;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;">💬 Send via WhatsApp</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('modal-close').onclick = () => { closeModal(); render(); };
+            document.getElementById('btn-copy-link').onclick = () => {
+                navigator.clipboard.writeText(url).then(() => {
+                    document.getElementById('btn-copy-link').textContent = '✅ Copied!';
+                    setTimeout(() => { document.getElementById('btn-copy-link').textContent = '📋 Copy Link'; }, 2000);
+                });
+            };
+            document.getElementById('btn-send-whatsapp').onclick = () => {
+                window.open(`https://wa.me/${formattedPhone}?text=${encodeURIComponent(whatsappMsg)}`, '_blank');
+            };
+        }
+
         function exportCSV() {
             let csv = 'Customer,Phone,Description,Amount,Paid,Outstanding,Status,Due Date\n';
             state.invoices.forEach(inv => {
@@ -1433,7 +1599,17 @@
                 bank: document.getElementById('set-bank').value.trim()
             };
             localStorage.setItem('owomi_business', JSON.stringify(state.businessProfile));
+
+            // Save API keys
+            state.apiKeys = {
+                termiiKey: document.getElementById('set-termii')?.value.trim() || '',
+                paystackPublic: document.getElementById('set-paystack-public')?.value.trim() || '',
+                paystackSecret: document.getElementById('set-paystack-secret')?.value.trim() || ''
+            };
+            localStorage.setItem('owomi_apikeys', JSON.stringify(state.apiKeys));
+
             alert('Settings saved!');
+            render();
         }
 
         // ========== INIT ==========
