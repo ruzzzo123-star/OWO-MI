@@ -4,14 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Owo Mi</title>
-    
+
     <!-- PWA Meta Tags -->
     <meta name="description" content="Smart Invoice Manager for Nigerian Businesses">
     <meta name="theme-color" content="#6366f1">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Owo Mi">
-    
+
     <!-- PWA Manifest -->
     <link rel="manifest" href="data:application/json,{
         &quot;name&quot;: &quot;Owo Mi - Invoice Manager&quot;,
@@ -29,10 +29,10 @@
             &quot;purpose&quot;: &quot;any maskable&quot;
         }]
     }">
-    
+
     <!-- iOS Icons -->
     <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%236366f1' width='100' height='100' rx='20'/><text x='50' y='65' text-anchor='middle' font-size='50'>💰</text></svg>">
-    
+
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { 
@@ -557,13 +557,14 @@
             customers: [],
             invoices: [],
             activeTab: 'home',
-            menuPage: null, // null, 'customers', 'reports', 'recurring', 'settings'
+            menuPage: null,
             loading: true,
             searchQuery: '',
             filterStatus: 'all',
             businessProfile: JSON.parse(localStorage.getItem('owomi_business') || '{}'),
             paymentHistory: JSON.parse(localStorage.getItem('owomi_payments') || '[]'),
-            recurringTemplates: JSON.parse(localStorage.getItem('owomi_recurring') || '[]')
+            recurringTemplates: JSON.parse(localStorage.getItem('owomi_recurring') || '[]'),
+            reminderSettings: null
         };
 
         // ========== AUTH ==========
@@ -619,12 +620,14 @@
             const session = getSession();
             if (!session) return;
             try {
-                const [customers, invoices] = await Promise.all([
+                const [customers, invoices, reminderSettings] = await Promise.all([
                     supabaseQuery('customers', { query: `user_id=eq.${session.user.id}&order=created_at.desc` }),
-                    supabaseQuery('invoices', { query: `user_id=eq.${session.user.id}&order=created_at.desc` })
+                    supabaseQuery('invoices', { query: `user_id=eq.${session.user.id}&order=created_at.desc` }),
+                    supabaseQuery('reminder_settings', { query: `user_id=eq.${session.user.id}` })
                 ]);
                 state.customers = customers || [];
                 state.invoices = invoices || [];
+                state.reminderSettings = reminderSettings?.[0] || null;
             } catch (err) {
                 console.error('Load error:', err);
             }
@@ -1035,6 +1038,8 @@
 
         function renderSettingsPage() {
             const p = state.businessProfile;
+            const r = state.reminderSettings || { before_due_days: 3, on_due_date: true, after_due_days: [3, 7], enabled: false };
+            
             return `
                 <button class="back-btn" data-back>← Back</button>
                 <div class="section-title" style="margin-bottom: 16px;">⚙️ Business Profile</div>
@@ -1056,16 +1061,62 @@
                     <textarea class="form-input" id="set-bank" rows="3" placeholder="Bank Name&#10;Account Number&#10;Account Name">${p.bank || ''}</textarea>
                 </div>
 
-                <div class="report-card" style="margin-top:24px;">
-                    <div class="report-title">🔒 Secure Integrations</div>
-                    <p style="color:#666;font-size:13px;">SMS and Payment features are securely configured. Your API keys are safely stored on the server.</p>
-                    <div style="margin-top:12px;">
-                        <span class="badge badge-paid">✓ SMS (Termii)</span>
-                        <span class="badge badge-paid" style="margin-left:8px;">✓ Payments (Paystack)</span>
+                <button class="btn btn-primary" id="btn-save-settings" style="margin-top:16px;">Save Profile</button>
+
+                <div class="section-title" style="margin: 32px 0 16px;">🔔 Auto Reminders</div>
+                <p style="color:#666;margin-bottom:20px;font-size:14px;">Automatically remind customers about unpaid invoices</p>
+                
+                <div class="card" style="padding:20px;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                        <div>
+                            <div style="font-weight:600;">Enable Auto Reminders</div>
+                            <div style="font-size:13px;color:#666;">Send SMS reminders automatically</div>
+                        </div>
+                        <div class="menu-toggle ${r.enabled ? 'active' : ''}" id="toggle-reminders"></div>
+                    </div>
+
+                    <div id="reminder-options" class="${r.enabled ? '' : 'hidden'}">
+                        <div class="form-group">
+                            <label class="form-label">Days before due date</label>
+                            <select class="form-input" id="rem-before">
+                                <option value="1" ${r.before_due_days === 1 ? 'selected' : ''}>1 day before</option>
+                                <option value="2" ${r.before_due_days === 2 ? 'selected' : ''}>2 days before</option>
+                                <option value="3" ${r.before_due_days === 3 ? 'selected' : ''}>3 days before</option>
+                                <option value="5" ${r.before_due_days === 5 ? 'selected' : ''}>5 days before</option>
+                                <option value="7" ${r.before_due_days === 7 ? 'selected' : ''}>7 days before</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" style="display:flex;align-items:center;gap:10px;">
+                                <input type="checkbox" id="rem-due" ${r.on_due_date ? 'checked' : ''} style="width:20px;height:20px;">
+                                Remind on due date
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Overdue reminders</label>
+                            <div style="display:flex;flex-wrap:wrap;gap:8px;">
+                                <label style="display:flex;align-items:center;gap:6px;font-size:14px;">
+                                    <input type="checkbox" id="rem-over-3" ${r.after_due_days?.includes(3) ? 'checked' : ''}> 3 days
+                                </label>
+                                <label style="display:flex;align-items:center;gap:6px;font-size:14px;">
+                                    <input type="checkbox" id="rem-over-7" ${r.after_due_days?.includes(7) ? 'checked' : ''}> 7 days
+                                </label>
+                                <label style="display:flex;align-items:center;gap:6px;font-size:14px;">
+                                    <input type="checkbox" id="rem-over-14" ${r.after_due_days?.includes(14) ? 'checked' : ''}> 14 days
+                                </label>
+                                <label style="display:flex;align-items:center;gap:6px;font-size:14px;">
+                                    <input type="checkbox" id="rem-over-30" ${r.after_due_days?.includes(30) ? 'checked' : ''}> 30 days
+                                </label>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <button class="btn btn-primary" id="btn-save-settings" style="margin-top:24px;">Save Settings</button>
+                <button class="btn btn-primary" id="btn-save-reminders" style="margin-top:16px;">Save Reminder Settings</button>
+
+                <button class="btn btn-secondary" id="btn-send-all-overdue" style="margin-top:12px;">📢 Send All Overdue Reminders Now</button>
             `;
         }
 
@@ -1182,6 +1233,102 @@
                     }
                 };
             });
+
+            // Reminder settings
+            document.getElementById('toggle-reminders')?.addEventListener('click', function() {
+                this.classList.toggle('active');
+                document.getElementById('reminder-options')?.classList.toggle('hidden');
+            });
+
+            document.getElementById('btn-save-reminders')?.addEventListener('click', saveReminderSettings);
+            document.getElementById('btn-send-all-overdue')?.addEventListener('click', sendAllOverdueReminders);
+        }
+
+        // ========== REMINDER FUNCTIONS ==========
+        async function saveReminderSettings() {
+            const session = getSession();
+            const enabled = document.getElementById('toggle-reminders')?.classList.contains('active');
+            const before_due_days = parseInt(document.getElementById('rem-before')?.value) || 3;
+            const on_due_date = document.getElementById('rem-due')?.checked || false;
+            
+            const after_due_days = [];
+            if (document.getElementById('rem-over-3')?.checked) after_due_days.push(3);
+            if (document.getElementById('rem-over-7')?.checked) after_due_days.push(7);
+            if (document.getElementById('rem-over-14')?.checked) after_due_days.push(14);
+            if (document.getElementById('rem-over-30')?.checked) after_due_days.push(30);
+
+            const data = {
+                user_id: session.user.id,
+                enabled,
+                before_due_days,
+                on_due_date,
+                after_due_days,
+                reminder_channel: 'sms'
+            };
+
+            try {
+                if (state.reminderSettings?.id) {
+                    await supabaseQuery('reminder_settings', {
+                        method: 'PATCH',
+                        query: `id=eq.${state.reminderSettings.id}`,
+                        body: data
+                    });
+                } else {
+                    const result = await supabaseQuery('reminder_settings', {
+                        method: 'POST',
+                        body: data
+                    });
+                    state.reminderSettings = result[0];
+                }
+                state.reminderSettings = { ...state.reminderSettings, ...data };
+                alert('✅ Reminder settings saved!');
+            } catch (err) {
+                alert('❌ Error: ' + err.message);
+            }
+        }
+
+        async function sendAllOverdueReminders() {
+            const overdue = state.invoices.filter(i => getStatus(i) === 'overdue');
+            if (overdue.length === 0) {
+                alert('No overdue invoices! 🎉');
+                return;
+            }
+
+            if (!confirm(`Send SMS reminders to ${overdue.length} overdue customers?`)) return;
+
+            let sent = 0, failed = 0;
+
+            for (const inv of overdue) {
+                const cust = state.customers.find(c => c.id === inv.customer_id);
+                if (!cust?.phone) { failed++; continue; }
+
+                const owed = inv.amount - inv.amount_paid;
+                const daysOverdue = Math.floor((new Date() - new Date(inv.due_date)) / (1000 * 60 * 60 * 24));
+                const message = `Hi ${cust.name}, OVERDUE: ₦${owed.toLocaleString()} for "${inv.description}" is ${daysOverdue} days late. Please pay immediately. - ${state.businessProfile.name || 'Owo Mi'}`;
+
+                try {
+                    let phone = cust.phone.replace(/\s/g, '');
+                    if (phone.startsWith('0')) phone = '234' + phone.slice(1);
+                    if (!phone.startsWith('234')) phone = '234' + phone;
+
+                    const res = await fetch('https://djqmtzqnwklwnvlqlejj.supabase.co/functions/v1/send-sms', {
+                        method: 'POST',
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${SUPABASE_KEY}`
+                        },
+                        body: JSON.stringify({ phone, message })
+                    });
+
+                    const data = await res.json();
+                    if (data.code === 'ok' || data.message_id) sent++;
+                    else failed++;
+                } catch (err) {
+                    failed++;
+                }
+            }
+
+            alert(`✅ Sent: ${sent}\n❌ Failed: ${failed}`);
         }
 
         // ========== MODALS ==========
@@ -1444,7 +1591,6 @@
                 });
                 const data = await res.json();
                 
-                // Handle different response formats
                 let reply = "Sorry, couldn't process that.";
                 if (data.content && data.content[0] && data.content[0].text) {
                     reply = data.content[0].text;
@@ -1648,7 +1794,6 @@
         // ========== PWA ==========
         let deferredPrompt;
         
-        // Register Service Worker
         if ('serviceWorker' in navigator) {
             const swCode = `
                 const CACHE_NAME = 'owomi-v1';
@@ -1688,12 +1833,10 @@
             });
         }
 
-        // Install Prompt
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
             
-            // Show install prompt after 3 seconds if not already installed
             if (!localStorage.getItem('owomi_installed')) {
                 setTimeout(showInstallPrompt, 3000);
             }
@@ -1727,11 +1870,10 @@
 
             document.getElementById('install-close').onclick = () => {
                 prompt.remove();
-                localStorage.setItem('owomi_installed', '1'); // Don't show again
+                localStorage.setItem('owomi_installed', '1');
             };
         }
 
-        // Detect if running as PWA
         if (window.matchMedia('(display-mode: standalone)').matches) {
             console.log('Running as PWA');
         }
