@@ -4,6 +4,35 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Owo Mi</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="description" content="Smart Invoice Manager for Nigerian Businesses">
+    <meta name="theme-color" content="#6366f1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Owo Mi">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="data:application/json,{
+        &quot;name&quot;: &quot;Owo Mi - Invoice Manager&quot;,
+        &quot;short_name&quot;: &quot;Owo Mi&quot;,
+        &quot;description&quot;: &quot;Smart Invoice Manager for Nigerian Businesses&quot;,
+        &quot;start_url&quot;: &quot;.&quot;,
+        &quot;display&quot;: &quot;standalone&quot;,
+        &quot;background_color&quot;: &quot;#6366f1&quot;,
+        &quot;theme_color&quot;: &quot;#6366f1&quot;,
+        &quot;orientation&quot;: &quot;portrait&quot;,
+        &quot;icons&quot;: [{
+            &quot;src&quot;: &quot;data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%236366f1' width='100' height='100' rx='20'/><text x='50' y='65' text-anchor='middle' font-size='50'>💰</text></svg>&quot;,
+            &quot;sizes&quot;: &quot;512x512&quot;,
+            &quot;type&quot;: &quot;image/svg+xml&quot;,
+            &quot;purpose&quot;: &quot;any maskable&quot;
+        }]
+    }">
+    
+    <!-- iOS Icons -->
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%236366f1' width='100' height='100' rx='20'/><text x='50' y='65' text-anchor='middle' font-size='50'>💰</text></svg>">
+    
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { 
@@ -12,6 +41,35 @@
             min-height: 100vh;
             overflow-x: hidden;
         }
+        
+        /* Install Prompt */
+        .install-prompt {
+            position: fixed;
+            bottom: 80px;
+            left: 16px;
+            right: 16px;
+            background: white;
+            padding: 16px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 1000;
+            animation: slideUp 0.3s ease;
+        }
+        @keyframes slideUp {
+            from { transform: translateY(100px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .install-prompt-icon { font-size: 32px; }
+        .install-prompt-text { flex: 1; }
+        .install-prompt-title { font-weight: 600; font-size: 15px; }
+        .install-prompt-desc { font-size: 13px; color: #666; }
+        .install-prompt-btn { background: #6366f1; color: white; border: none; padding: 10px 20px; border-radius: 10px; font-weight: 600; cursor: pointer; }
+        .install-prompt-close { background: none; border: none; font-size: 20px; color: #999; cursor: pointer; padding: 8px; }
+        body.dark .install-prompt { background: #1a1a2e; }
+        body.dark .install-prompt-title { color: #eee; }
         
         /* Auth Screen */
         .auth-container { 
@@ -1577,6 +1635,97 @@
         }
 
         init();
+
+        // ========== PWA ==========
+        let deferredPrompt;
+        
+        // Register Service Worker
+        if ('serviceWorker' in navigator) {
+            const swCode = `
+                const CACHE_NAME = 'owomi-v1';
+                const urlsToCache = ['/'];
+                
+                self.addEventListener('install', e => {
+                    e.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache)));
+                    self.skipWaiting();
+                });
+                
+                self.addEventListener('activate', e => {
+                    e.waitUntil(caches.keys().then(keys => 
+                        Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
+                    ));
+                });
+                
+                self.addEventListener('fetch', e => {
+                    e.respondWith(
+                        fetch(e.request)
+                            .then(res => {
+                                const clone = res.clone();
+                                caches.open(CACHE_NAME).then(cache => cache.put(e.request, clone));
+                                return res;
+                            })
+                            .catch(() => caches.match(e.request))
+                    );
+                });
+            `;
+            
+            const blob = new Blob([swCode], { type: 'application/javascript' });
+            const swUrl = URL.createObjectURL(blob);
+            
+            navigator.serviceWorker.register(swUrl).then(reg => {
+                console.log('SW registered:', reg.scope);
+            }).catch(err => {
+                console.log('SW registration failed:', err);
+            });
+        }
+
+        // Install Prompt
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            // Show install prompt after 3 seconds if not already installed
+            if (!localStorage.getItem('owomi_installed')) {
+                setTimeout(showInstallPrompt, 3000);
+            }
+        });
+
+        function showInstallPrompt() {
+            if (!deferredPrompt) return;
+            
+            const prompt = document.createElement('div');
+            prompt.className = 'install-prompt';
+            prompt.innerHTML = `
+                <div class="install-prompt-icon">💰</div>
+                <div class="install-prompt-text">
+                    <div class="install-prompt-title">Install Owo Mi</div>
+                    <div class="install-prompt-desc">Add to home screen for quick access</div>
+                </div>
+                <button class="install-prompt-btn" id="install-btn">Install</button>
+                <button class="install-prompt-close" id="install-close">×</button>
+            `;
+            document.body.appendChild(prompt);
+
+            document.getElementById('install-btn').onclick = async () => {
+                prompt.remove();
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    localStorage.setItem('owomi_installed', '1');
+                }
+                deferredPrompt = null;
+            };
+
+            document.getElementById('install-close').onclick = () => {
+                prompt.remove();
+                localStorage.setItem('owomi_installed', '1'); // Don't show again
+            };
+        }
+
+        // Detect if running as PWA
+        if (window.matchMedia('(display-mode: standalone)').matches) {
+            console.log('Running as PWA');
+        }
     </script>
 </body>
 </html>
