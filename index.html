@@ -1443,12 +1443,22 @@
                     body: JSON.stringify({ message: userText, context })
                 });
                 const data = await res.json();
-                const reply = data.content?.[0]?.text || data.error || "Sorry, couldn't process that.";
+                
+                // Handle different response formats
+                let reply = "Sorry, couldn't process that.";
+                if (data.content && data.content[0] && data.content[0].text) {
+                    reply = data.content[0].text;
+                } else if (data.error) {
+                    reply = "Error: " + (typeof data.error === 'string' ? data.error : JSON.stringify(data.error));
+                } else if (typeof data === 'string') {
+                    reply = data;
+                }
+                
                 document.getElementById('typing')?.remove();
                 messages.innerHTML += `<div class="ai-msg assistant"><div class="ai-bubble">${reply}</div></div>`;
-            } catch {
+            } catch (err) {
                 document.getElementById('typing')?.remove();
-                messages.innerHTML += `<div class="ai-msg assistant"><div class="ai-bubble">Sorry, error connecting to AI.</div></div>`;
+                messages.innerHTML += `<div class="ai-msg assistant"><div class="ai-bubble">Sorry, error connecting to AI: ${err.message}</div></div>`;
             }
             messages.scrollTop = messages.scrollHeight;
         }
