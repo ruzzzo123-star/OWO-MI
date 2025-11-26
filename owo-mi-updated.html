@@ -1,0 +1,1882 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Owo Mi</title>
+
+    <!-- PWA Meta Tags -->
+    <meta name="description" content="Smart Invoice Manager for Nigerian Businesses">
+    <meta name="theme-color" content="#6366f1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Owo Mi">
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="data:application/json,{
+        &quot;name&quot;: &quot;Owo Mi - Invoice Manager&quot;,
+        &quot;short_name&quot;: &quot;Owo Mi&quot;,
+        &quot;description&quot;: &quot;Smart Invoice Manager for Nigerian Businesses&quot;,
+        &quot;start_url&quot;: &quot;.&quot;,
+        &quot;display&quot;: &quot;standalone&quot;,
+        &quot;background_color&quot;: &quot;#6366f1&quot;,
+        &quot;theme_color&quot;: &quot;#6366f1&quot;,
+        &quot;orientation&quot;: &quot;portrait&quot;,
+        &quot;icons&quot;: [{
+            &quot;src&quot;: &quot;data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%236366f1' width='100' height='100' rx='20'/><text x='50' y='65' text-anchor='middle' font-size='50'>💰</text></svg>&quot;,
+            &quot;sizes&quot;: &quot;512x512&quot;,
+            &quot;type&quot;: &quot;image/svg+xml&quot;,
+            &quot;purpose&quot;: &quot;any maskable&quot;
+        }]
+    }">
+
+    <!-- iOS Icons -->
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%236366f1' width='100' height='100' rx='20'/><text x='50' y='65' text-anchor='middle' font-size='50'>💰</text></svg>">
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+            background: #f5f5f5; 
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        /* Install Prompt */
+        .install-prompt {
+            position: fixed;
+            bottom: 80px;
+            left: 16px;
+            right: 16px;
+            background: white;
+            padding: 16px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 1000;
+            animation: slideUp 0.3s ease;
+        }
+        @keyframes slideUp {
+            from { transform: translateY(100px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .install-prompt-icon { font-size: 32px; }
+        .install-prompt-text { flex: 1; }
+        .install-prompt-title { font-weight: 600; font-size: 15px; }
+        .install-prompt-desc { font-size: 13px; color: #666; }
+        .install-prompt-btn { background: #6366f1; color: white; border: none; padding: 10px 20px; border-radius: 10px; font-weight: 600; cursor: pointer; }
+        .install-prompt-close { background: none; border: none; font-size: 20px; color: #999; cursor: pointer; padding: 8px; }
+        body.dark .install-prompt { background: #1a1a2e; }
+        body.dark .install-prompt-title { color: #eee; }
+        
+        /* Auth Screen */
+        .auth-container { 
+            min-height: 100vh; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            padding: 24px; 
+            background: linear-gradient(135deg, #6366f1, #8b5cf6); 
+        }
+        .auth-box { 
+            background: white; 
+            padding: 32px 24px; 
+            border-radius: 20px; 
+            width: 100%; 
+            max-width: 360px; 
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3); 
+        }
+        .auth-title { text-align: center; font-size: 32px; font-weight: bold; margin-bottom: 8px; }
+        .auth-subtitle { text-align: center; color: #666; margin-bottom: 28px; font-size: 15px; }
+        
+        .tabs { display: flex; background: #f0f0f0; border-radius: 12px; padding: 4px; margin-bottom: 24px; }
+        .tab { flex: 1; padding: 12px; border: none; background: transparent; cursor: pointer; border-radius: 10px; font-weight: 600; font-size: 15px; }
+        .tab.active { background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        
+        .error-msg { background: #fee2e2; color: #dc2626; padding: 14px; border-radius: 12px; margin-bottom: 16px; font-size: 14px; }
+        .success-msg { background: #dcfce7; color: #166534; padding: 14px; border-radius: 12px; margin-bottom: 16px; font-size: 14px; }
+        
+        /* Header */
+        .header { 
+            background: linear-gradient(135deg, #6366f1, #8b5cf6); 
+            color: white; 
+            padding: 20px; 
+            padding-top: max(20px, env(safe-area-inset-top));
+        }
+        .header-content { display: flex; justify-content: space-between; align-items: center; }
+        .header h1 { font-size: 24px; font-weight: 700; }
+        .header-actions { display: flex; gap: 8px; }
+        .header-btn { 
+            background: rgba(255,255,255,0.2); 
+            border: none; 
+            color: white; 
+            width: 40px; 
+            height: 40px; 
+            border-radius: 50%; 
+            cursor: pointer; 
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .header-btn:active { background: rgba(255,255,255,0.3); }
+        
+        /* Main Content */
+        .main { 
+            padding: 20px; 
+            padding-bottom: 100px; 
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        /* Stats Grid */
+        .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+        .stat { 
+            background: white; 
+            padding: 18px 16px; 
+            border-radius: 16px; 
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06); 
+        }
+        .stat-label { font-size: 13px; color: #888; margin-bottom: 4px; }
+        .stat-value { font-size: 22px; font-weight: 700; color: #333; }
+        .stat-value.green { color: #16a34a; }
+        .stat-value.red { color: #dc2626; }
+        
+        /* Quick Actions */
+        .quick-actions { display: flex; gap: 12px; margin-bottom: 24px; }
+        .quick-btn { 
+            flex: 1; 
+            padding: 16px; 
+            border: none; 
+            border-radius: 14px; 
+            font-size: 15px; 
+            font-weight: 600; 
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .quick-btn.primary { background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; }
+        .quick-btn.secondary { background: white; color: #6366f1; border: 2px solid #6366f1; }
+        .quick-btn:active { transform: scale(0.98); }
+        
+        /* Section */
+        .section-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 12px; 
+        }
+        .section-title { font-size: 18px; font-weight: 700; color: #333; }
+        .section-link { color: #6366f1; font-size: 14px; font-weight: 600; background: none; border: none; cursor: pointer; }
+        
+        /* Cards */
+        .card { 
+            background: white; 
+            padding: 16px; 
+            border-radius: 16px; 
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06); 
+            margin-bottom: 12px; 
+        }
+        .card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+        .card-name { font-weight: 600; font-size: 16px; color: #333; }
+        .card-desc { font-size: 14px; color: #666; margin-top: 2px; }
+        .card-date { font-size: 12px; color: #999; margin-top: 4px; }
+        .card-amount { font-weight: 700; font-size: 18px; text-align: right; }
+        
+        .badge { 
+            display: inline-block; 
+            padding: 5px 12px; 
+            border-radius: 20px; 
+            font-size: 12px; 
+            font-weight: 600; 
+            margin-top: 4px; 
+        }
+        .badge-paid { background: #dcfce7; color: #166534; }
+        .badge-pending { background: #fef3c7; color: #854d0e; }
+        .badge-overdue { background: #fee2e2; color: #dc2626; }
+        
+        .card-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+        .card-btn { 
+            flex: 1; 
+            min-width: 70px;
+            padding: 12px 8px; 
+            border: none; 
+            border-radius: 10px; 
+            font-size: 13px; 
+            font-weight: 600; 
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+        .card-btn:active { opacity: 0.8; }
+        .btn-pdf { background: #f3e8ff; color: #7c3aed; }
+        .btn-whatsapp { background: #dcfce7; color: #16a34a; }
+        .btn-sms { background: #fef3c7; color: #d97706; }
+        .btn-paylink { background: #dbeafe; color: #1d4ed8; }
+        .btn-pay { background: #dbeafe; color: #2563eb; }
+        .btn-edit { background: #f1f5f9; color: #475569; }
+        
+        /* Search & Filter */
+        .search-box { 
+            background: white; 
+            border-radius: 14px; 
+            padding: 4px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        .search-input { 
+            width: 100%; 
+            padding: 14px 16px; 
+            border: none; 
+            font-size: 16px; 
+            background: transparent;
+            outline: none;
+        }
+        .filter-tabs { display: flex; gap: 8px; margin-bottom: 16px; overflow-x: auto; padding-bottom: 4px; }
+        .filter-tab { 
+            padding: 10px 18px; 
+            border: 2px solid #e5e7eb; 
+            border-radius: 25px; 
+            background: white; 
+            cursor: pointer; 
+            font-size: 14px; 
+            font-weight: 600;
+            white-space: nowrap;
+            color: #666;
+        }
+        .filter-tab.active { background: #6366f1; color: white; border-color: #6366f1; }
+        
+        /* Menu Page */
+        .menu-grid { display: flex; flex-direction: column; gap: 8px; }
+        .menu-item { 
+            background: white; 
+            padding: 18px 20px; 
+            border-radius: 14px; 
+            display: flex; 
+            align-items: center; 
+            gap: 16px;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            border: none;
+            width: 100%;
+            text-align: left;
+            font-size: 16px;
+        }
+        .menu-item:active { background: #f5f5f5; }
+        .menu-icon { font-size: 24px; width: 40px; text-align: center; }
+        .menu-text { flex: 1; font-weight: 500; color: #333; }
+        .menu-arrow { color: #ccc; font-size: 20px; }
+        .menu-toggle { 
+            width: 50px; 
+            height: 28px; 
+            border-radius: 14px; 
+            background: #e5e7eb; 
+            position: relative;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .menu-toggle.active { background: #6366f1; }
+        .menu-toggle::after {
+            content: '';
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+            transition: left 0.3s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .menu-toggle.active::after { left: 24px; }
+        
+        .menu-section { 
+            font-size: 13px; 
+            color: #999; 
+            padding: 20px 8px 10px; 
+            font-weight: 600; 
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        /* Sub-pages */
+        .subpage { display: none; }
+        .subpage.active { display: block; }
+        .back-btn { 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+            background: none; 
+            border: none; 
+            color: #6366f1; 
+            font-size: 16px; 
+            font-weight: 600; 
+            margin-bottom: 20px;
+            cursor: pointer;
+            padding: 8px 0;
+        }
+        
+        /* Reports */
+        .report-card { 
+            background: white; 
+            border-radius: 16px; 
+            padding: 20px; 
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        .report-title { font-size: 16px; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+        .report-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f0f0f0; }
+        .report-row:last-child { border-bottom: none; }
+        .report-label { color: #666; }
+        .report-value { font-weight: 700; }
+        .report-value.green { color: #16a34a; }
+        .report-value.red { color: #dc2626; }
+        
+        /* Chart */
+        .chart-container { 
+            background: white; 
+            border-radius: 16px; 
+            padding: 20px; 
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        .chart-title { font-weight: 700; margin-bottom: 16px; }
+        .bar-chart { display: flex; align-items: flex-end; gap: 8px; height: 100px; }
+        .bar-group { flex: 1; display: flex; flex-direction: column; align-items: center; }
+        .bar { width: 100%; border-radius: 6px 6px 0 0; min-height: 4px; background: linear-gradient(to top, #16a34a, #22c55e); }
+        .bar-label { font-size: 11px; color: #888; margin-top: 8px; }
+        
+        /* Bottom Navigation */
+        .nav { 
+            position: fixed; 
+            bottom: 0; 
+            left: 0; 
+            right: 0; 
+            background: white; 
+            display: flex; 
+            border-top: 1px solid #eee;
+            padding-bottom: env(safe-area-inset-bottom);
+            box-shadow: 0 -2px 20px rgba(0,0,0,0.08);
+        }
+        .nav-item { 
+            flex: 1; 
+            padding: 12px 8px; 
+            padding-bottom: 8px;
+            text-align: center; 
+            color: #999; 
+            background: none; 
+            border: none; 
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+        .nav-item.active { color: #6366f1; }
+        .nav-icon { font-size: 24px; }
+        .nav-label { font-size: 11px; font-weight: 600; }
+        
+        /* Modal */
+        .modal { 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            right: 0; 
+            bottom: 0; 
+            background: rgba(0,0,0,0.5); 
+            display: flex; 
+            align-items: flex-end; 
+            justify-content: center; 
+            z-index: 100;
+            padding: 0;
+        }
+        .modal-box { 
+            background: white; 
+            border-radius: 24px 24px 0 0; 
+            width: 100%; 
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .modal-header { 
+            padding: 20px 24px; 
+            border-bottom: 1px solid #eee; 
+            font-size: 20px; 
+            font-weight: 700;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            background: white;
+            z-index: 1;
+        }
+        .modal-close { background: none; border: none; font-size: 28px; color: #999; cursor: pointer; padding: 0; line-height: 1; }
+        .modal-body { padding: 24px; }
+        .modal-footer { padding: 16px 24px; border-top: 1px solid #eee; display: flex; gap: 12px; }
+        .modal-footer .btn { flex: 1; }
+        
+        .form-group { margin-bottom: 20px; }
+        .form-label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 8px; color: #333; }
+        .form-input { 
+            width: 100%; 
+            padding: 14px 16px; 
+            border: 2px solid #e5e7eb; 
+            border-radius: 12px; 
+            font-size: 16px; 
+            transition: border-color 0.2s;
+        }
+        .form-input:focus { outline: none; border-color: #6366f1; }
+        
+        .btn { 
+            padding: 16px 24px; 
+            border: none; 
+            border-radius: 12px; 
+            font-size: 16px; 
+            font-weight: 600; 
+            cursor: pointer; 
+            width: 100%; 
+        }
+        .btn:active { transform: scale(0.98); }
+        .btn-primary { background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; }
+        .btn-secondary { background: #f1f5f9; color: #475569; }
+        .btn-danger { background: #fee2e2; color: #dc2626; }
+        
+        .empty { text-align: center; padding: 40px 20px; color: #999; }
+        .empty-icon { font-size: 48px; margin-bottom: 12px; }
+        
+        .loading { 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            min-height: 100vh; 
+            font-size: 18px; 
+            color: #666; 
+        }
+        .hidden { display: none !important; }
+        
+        /* Dark Mode */
+        body.dark { background: #0f0f1a; }
+        body.dark .header { background: linear-gradient(135deg, #4338ca, #6d28d9); }
+        body.dark .stat, body.dark .card, body.dark .chart-container, body.dark .report-card, body.dark .menu-item, body.dark .search-box { 
+            background: #1a1a2e; 
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2); 
+        }
+        body.dark .stat-label, body.dark .card-desc, body.dark .card-date, body.dark .report-label, body.dark .bar-label { color: #666; }
+        body.dark .stat-value, body.dark .card-name, body.dark .section-title, body.dark .chart-title, body.dark .report-title, body.dark .report-value, body.dark .menu-text { color: #eee; }
+        body.dark .form-input, body.dark .search-input { background: #1a1a2e; border-color: #333; color: #eee; }
+        body.dark .modal-box, body.dark .modal-header { background: #1a1a2e; }
+        body.dark .modal-header, body.dark .modal-footer { border-color: #333; }
+        body.dark .nav { background: #1a1a2e; border-color: #333; }
+        body.dark .filter-tab { background: #1a1a2e; border-color: #333; color: #888; }
+        body.dark .filter-tab.active { background: #6366f1; border-color: #6366f1; color: white; }
+        body.dark .quick-btn.secondary { background: #1a1a2e; border-color: #6366f1; }
+        body.dark .card-amount, body.dark .form-label { color: #eee; }
+        body.dark .auth-box { background: #1a1a2e; }
+        body.dark .auth-title, body.dark .tab { color: #eee; }
+        body.dark .tabs { background: #0f0f1a; }
+        body.dark .tab.active { background: #1a1a2e; }
+        body.dark .menu-toggle { background: #333; }
+        body.dark .btn-secondary { background: #333; color: #eee; }
+
+        /* AI Chat */
+        .ai-modal .modal-box { height: 85vh; display: flex; flex-direction: column; }
+        .ai-messages { flex: 1; overflow-y: auto; padding: 16px; }
+        .ai-msg { margin-bottom: 12px; display: flex; }
+        .ai-msg.user { justify-content: flex-end; }
+        .ai-bubble { max-width: 85%; padding: 12px 16px; border-radius: 18px; font-size: 15px; line-height: 1.5; }
+        .ai-msg.assistant .ai-bubble { background: #f0f0f0; color: #333; border-bottom-left-radius: 4px; }
+        .ai-msg.user .ai-bubble { background: #6366f1; color: white; border-bottom-right-radius: 4px; }
+        body.dark .ai-msg.assistant .ai-bubble { background: #333; color: #eee; }
+        .ai-input-area { padding: 16px; border-top: 1px solid #eee; display: flex; gap: 10px; }
+        body.dark .ai-input-area { border-color: #333; }
+        .ai-input { flex: 1; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 25px; font-size: 16px; outline: none; }
+        .ai-input:focus { border-color: #6366f1; }
+        .ai-send { background: #6366f1; color: white; border: none; width: 48px; height: 48px; border-radius: 50%; cursor: pointer; font-size: 20px; }
+        .typing { display: flex; gap: 4px; padding: 12px 16px; }
+        .typing span { width: 8px; height: 8px; background: #999; border-radius: 50%; animation: bounce 1.4s infinite; }
+        .typing span:nth-child(2) { animation-delay: 0.2s; }
+        .typing span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes bounce { 0%, 60%, 100% { transform: translateY(0); } 30% { transform: translateY(-6px); } }
+
+        /* Customer Card */
+        .customer-card { 
+            background: white; 
+            padding: 16px; 
+            border-radius: 16px; 
+            margin-bottom: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        body.dark .customer-card { background: #1a1a2e; }
+        .customer-info { display: flex; justify-content: space-between; align-items: center; }
+        .customer-name { font-weight: 600; font-size: 16px; }
+        .customer-phone { font-size: 14px; color: #666; margin-top: 2px; }
+        .customer-balance { font-weight: 700; font-size: 16px; }
+        .customer-actions { display: flex; gap: 8px; margin-top: 12px; }
+
+        /* Recurring Badge */
+        .recurring-badge { 
+            background: #dbeafe; 
+            color: #1d4ed8; 
+            font-size: 11px; 
+            padding: 3px 8px; 
+            border-radius: 10px; 
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        /* Payment History */
+        .payment-item { 
+            display: flex; 
+            justify-content: space-between; 
+            padding: 14px 0; 
+            border-bottom: 1px solid #f0f0f0; 
+        }
+        .payment-item:last-child { border-bottom: none; }
+        .payment-date { color: #666; font-size: 14px; }
+        .payment-amount { font-weight: 700; color: #16a34a; }
+    </style>
+</head>
+<body>
+    <div id="app"></div>
+
+    <script>
+        // ========== CONFIG ==========
+        const SUPABASE_URL = 'https://djqmtzqnwklwnvlqlejj.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRqcW10enFud2tsd252bHFsZWpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQwNzk4OTMsImV4cCI6MjA3OTY1NTg5M30.7zCs844TQdocVDeB7fXc1uIziiGxoiGNLYFyxXf7ZJ8';
+
+        // ========== STATE ==========
+        let state = {
+            user: null,
+            customers: [],
+            invoices: [],
+            activeTab: 'home',
+            menuPage: null,
+            loading: true,
+            searchQuery: '',
+            filterStatus: 'all',
+            businessProfile: JSON.parse(localStorage.getItem('owomi_business') || '{}'),
+            paymentHistory: JSON.parse(localStorage.getItem('owomi_payments') || '[]'),
+            recurringTemplates: JSON.parse(localStorage.getItem('owomi_recurring') || '[]'),
+            reminderSettings: null
+        };
+
+        // ========== AUTH ==========
+        function getSession() {
+            const data = localStorage.getItem('owomi_session');
+            return data ? JSON.parse(data) : null;
+        }
+
+        function saveSession(session) {
+            localStorage.setItem('owomi_session', JSON.stringify(session));
+        }
+
+        function clearSession() {
+            localStorage.removeItem('owomi_session');
+        }
+
+        async function supabaseAuth(endpoint, body) {
+            const res = await fetch(`${SUPABASE_URL}/auth/v1/${endpoint}`, {
+                method: 'POST',
+                headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+            const data = await res.json();
+            if (data.error) throw new Error(data.error.message || data.msg || 'Auth error');
+            return data;
+        }
+
+        async function supabaseQuery(table, options = {}) {
+            const session = getSession();
+            if (!session) throw new Error('Not logged in');
+
+            let url = `${SUPABASE_URL}/rest/v1/${table}`;
+            if (options.query) url += `?${options.query}`;
+
+            const res = await fetch(url, {
+                method: options.method || 'GET',
+                headers: {
+                    'apikey': SUPABASE_KEY,
+                    'Authorization': `Bearer ${session.access_token}`,
+                    'Content-Type': 'application/json',
+                    'Prefer': options.prefer || 'return=representation'
+                },
+                body: options.body ? JSON.stringify(options.body) : undefined
+            });
+
+            const text = await res.text();
+            if (!res.ok) throw new Error(text || 'API error');
+            return text ? JSON.parse(text) : null;
+        }
+
+        // ========== DATA ==========
+        async function loadData() {
+            const session = getSession();
+            if (!session) return;
+            try {
+                const [customers, invoices, reminderSettings] = await Promise.all([
+                    supabaseQuery('customers', { query: `user_id=eq.${session.user.id}&order=created_at.desc` }),
+                    supabaseQuery('invoices', { query: `user_id=eq.${session.user.id}&order=created_at.desc` }),
+                    supabaseQuery('reminder_settings', { query: `user_id=eq.${session.user.id}` })
+                ]);
+                state.customers = customers || [];
+                state.invoices = invoices || [];
+                state.reminderSettings = reminderSettings?.[0] || null;
+            } catch (err) {
+                console.error('Load error:', err);
+            }
+        }
+
+        async function addCustomer(name, phone) {
+            const session = getSession();
+            const data = await supabaseQuery('customers', {
+                method: 'POST',
+                body: { user_id: session.user.id, name, phone }
+            });
+            state.customers.unshift(data[0]);
+        }
+
+        async function addInvoice(customerId, description, amount, dueDate) {
+            const session = getSession();
+            const data = await supabaseQuery('invoices', {
+                method: 'POST',
+                body: { user_id: session.user.id, customer_id: customerId, description, amount, amount_paid: 0, due_date: dueDate }
+            });
+            state.invoices.unshift(data[0]);
+        }
+
+        async function recordPayment(invoiceId, amount) {
+            const invoice = state.invoices.find(i => i.id === invoiceId);
+            const newPaid = Math.min(invoice.amount_paid + amount, invoice.amount);
+            await supabaseQuery('invoices', {
+                method: 'PATCH',
+                query: `id=eq.${invoiceId}`,
+                body: { amount_paid: newPaid }
+            });
+            invoice.amount_paid = newPaid;
+            state.paymentHistory.push({ id: Date.now().toString(), invoiceId, amount, date: new Date().toISOString() });
+            localStorage.setItem('owomi_payments', JSON.stringify(state.paymentHistory));
+        }
+
+        // ========== HELPERS ==========
+        const formatNaira = (amt) => '₦' + Number(amt).toLocaleString();
+        const formatDate = (d) => new Date(d).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' });
+        const getStatus = (inv) => {
+            if (inv.amount_paid >= inv.amount) return 'paid';
+            if (new Date(inv.due_date) < new Date()) return 'overdue';
+            return 'pending';
+        };
+
+        // ========== RENDER ==========
+        function render() {
+            const app = document.getElementById('app');
+            if (state.loading) { app.innerHTML = '<div class="loading">Loading...</div>'; return; }
+            if (!state.user) { app.innerHTML = renderAuth(); attachAuthEvents(); return; }
+            app.innerHTML = renderApp();
+            attachAppEvents();
+        }
+
+        function renderAuth() {
+            return `
+                <div class="auth-container">
+                    <div class="auth-box">
+                        <div class="auth-title">Owo Mi 💰</div>
+                        <div class="auth-subtitle">Smart Invoice Manager for Nigerian Businesses</div>
+                        <div class="tabs">
+                            <button class="tab active" data-tab="login">Login</button>
+                            <button class="tab" data-tab="signup">Sign Up</button>
+                        </div>
+                        <div id="auth-error" class="error-msg hidden"></div>
+                        <div id="auth-success" class="success-msg hidden"></div>
+                        <form id="auth-form">
+                            <div class="form-group hidden" id="name-group">
+                                <label class="form-label">Business Name</label>
+                                <input type="text" class="form-input" id="auth-name" placeholder="Your business name">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Email</label>
+                                <input type="email" class="form-input" id="auth-email" placeholder="you@example.com" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Password</label>
+                                <input type="password" class="form-input" id="auth-password" placeholder="••••••••" required minlength="6">
+                            </div>
+                            <button type="submit" class="btn btn-primary" id="auth-btn">Login</button>
+                        </form>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderApp() {
+            const outstanding = state.invoices.filter(i => getStatus(i) !== 'paid').reduce((s, i) => s + (i.amount - i.amount_paid), 0);
+            const collected = state.invoices.reduce((s, i) => s + Number(i.amount_paid), 0);
+
+            return `
+                <header class="header">
+                    <div class="header-content">
+                        <h1>Owo Mi 💰</h1>
+                        <div class="header-actions">
+                            <button class="header-btn" id="btn-ai">🤖</button>
+                        </div>
+                    </div>
+                </header>
+                <main class="main">
+                    ${state.activeTab === 'home' ? renderHome(outstanding, collected) : ''}
+                    ${state.activeTab === 'invoices' ? renderInvoices() : ''}
+                    ${state.activeTab === 'menu' ? renderMenu() : ''}
+                </main>
+                <nav class="nav">
+                    <button class="nav-item ${state.activeTab === 'home' ? 'active' : ''}" data-tab="home">
+                        <div class="nav-icon">🏠</div>
+                        <div class="nav-label">Home</div>
+                    </button>
+                    <button class="nav-item ${state.activeTab === 'invoices' ? 'active' : ''}" data-tab="invoices">
+                        <div class="nav-icon">📄</div>
+                        <div class="nav-label">Invoices</div>
+                    </button>
+                    <button class="nav-item ${state.activeTab === 'menu' ? 'active' : ''}" data-tab="menu">
+                        <div class="nav-icon">☰</div>
+                        <div class="nav-label">Menu</div>
+                    </button>
+                </nav>
+                <div id="modal-container"></div>
+            `;
+        }
+
+        function renderHome(outstanding, collected) {
+            const overdue = state.invoices.filter(i => getStatus(i) === 'overdue');
+            const overdueAmt = overdue.reduce((s, i) => s + (i.amount - i.amount_paid), 0);
+
+            return `
+                <div class="stats">
+                    <div class="stat">
+                        <div class="stat-label">Outstanding</div>
+                        <div class="stat-value">${formatNaira(outstanding)}</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-label">Collected</div>
+                        <div class="stat-value green">${formatNaira(collected)}</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-label">Overdue</div>
+                        <div class="stat-value red">${formatNaira(overdueAmt)}</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-label">Customers</div>
+                        <div class="stat-value">${state.customers.length}</div>
+                    </div>
+                </div>
+
+                <div class="quick-actions">
+                    <button class="quick-btn primary" id="btn-new-invoice">📄 New Invoice</button>
+                    <button class="quick-btn secondary" id="btn-new-customer">👤 Customer</button>
+                </div>
+
+                ${renderChart()}
+
+                <div class="section-header">
+                    <div class="section-title">Recent Invoices</div>
+                    <button class="section-link" data-goto="invoices">See All</button>
+                </div>
+                ${state.invoices.length === 0 ? 
+                    '<div class="empty"><div class="empty-icon">📄</div>No invoices yet.<br>Create your first one!</div>' : 
+                    state.invoices.slice(0, 3).map(renderInvoiceCard).join('')}
+            `;
+        }
+
+        function renderChart() {
+            const months = [];
+            const now = new Date();
+            for (let i = 5; i >= 0; i--) {
+                const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+                months.push({ label: d.toLocaleDateString('en-US', { month: 'short' }), year: d.getFullYear(), month: d.getMonth(), collected: 0 });
+            }
+            state.invoices.forEach(inv => {
+                const d = new Date(inv.created_at);
+                months.forEach(m => { if (d.getFullYear() === m.year && d.getMonth() === m.month) m.collected += Number(inv.amount_paid); });
+            });
+            const max = Math.max(...months.map(m => m.collected), 1);
+
+            return `
+                <div class="chart-container">
+                    <div class="chart-title">📊 Collections (6 Months)</div>
+                    <div class="bar-chart">
+                        ${months.map(m => `
+                            <div class="bar-group">
+                                <div class="bar" style="height: ${(m.collected / max) * 80}px;" title="${formatNaira(m.collected)}"></div>
+                                <div class="bar-label">${m.label}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderInvoices() {
+            let filtered = state.invoices;
+            if (state.searchQuery) {
+                const q = state.searchQuery.toLowerCase();
+                filtered = filtered.filter(inv => {
+                    const cust = state.customers.find(c => c.id === inv.customer_id);
+                    return inv.description.toLowerCase().includes(q) || (cust && cust.name.toLowerCase().includes(q));
+                });
+            }
+            if (state.filterStatus !== 'all') filtered = filtered.filter(inv => getStatus(inv) === state.filterStatus);
+
+            return `
+                <div class="search-box">
+                    <input type="text" class="search-input" id="search-input" placeholder="🔍 Search invoices..." value="${state.searchQuery}">
+                </div>
+                <div class="filter-tabs">
+                    <button class="filter-tab ${state.filterStatus === 'all' ? 'active' : ''}" data-filter="all">All</button>
+                    <button class="filter-tab ${state.filterStatus === 'pending' ? 'active' : ''}" data-filter="pending">Pending</button>
+                    <button class="filter-tab ${state.filterStatus === 'overdue' ? 'active' : ''}" data-filter="overdue">Overdue</button>
+                    <button class="filter-tab ${state.filterStatus === 'paid' ? 'active' : ''}" data-filter="paid">Paid</button>
+                </div>
+                ${filtered.length === 0 ? 
+                    '<div class="empty"><div class="empty-icon">📄</div>No invoices found</div>' : 
+                    filtered.map(renderInvoiceCard).join('')}
+            `;
+        }
+
+        function renderInvoiceCard(inv) {
+            const cust = state.customers.find(c => c.id === inv.customer_id);
+            const status = getStatus(inv);
+            return `
+                <div class="card">
+                    <div class="card-top">
+                        <div>
+                            <div class="card-name">${cust?.name || 'Unknown'}</div>
+                            <div class="card-desc">${inv.description}</div>
+                            <div class="card-date">Due: ${formatDate(inv.due_date)}</div>
+                        </div>
+                        <div class="card-amount">
+                            ${formatNaira(inv.amount)}
+                            <div class="badge badge-${status}">${status.charAt(0).toUpperCase() + status.slice(1)}</div>
+                        </div>
+                    </div>
+                    <div class="card-actions">
+                        <button class="card-btn btn-pdf" data-pdf="${inv.id}">📄</button>
+                        ${status !== 'paid' ? `<button class="card-btn btn-whatsapp" data-whatsapp="${inv.id}">💬</button>` : ''}
+                        ${status !== 'paid' ? `<button class="card-btn btn-sms" data-sms="${inv.id}">📱</button>` : ''}
+                        ${status !== 'paid' ? `<button class="card-btn btn-paylink" data-paylink="${inv.id}">💳</button>` : ''}
+                        ${status !== 'paid' ? `<button class="card-btn btn-pay" data-pay="${inv.id}">💰</button>` : ''}
+                        <button class="card-btn btn-edit" data-edit-inv="${inv.id}">✏️</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderMenu() {
+            if (state.menuPage === 'customers') return renderCustomersPage();
+            if (state.menuPage === 'reports') return renderReportsPage();
+            if (state.menuPage === 'recurring') return renderRecurringPage();
+            if (state.menuPage === 'settings') return renderSettingsPage();
+
+            const isDark = document.body.classList.contains('dark');
+            return `
+                <div class="menu-section">Business</div>
+                <div class="menu-grid">
+                    <button class="menu-item" data-menu="customers">
+                        <div class="menu-icon">👥</div>
+                        <div class="menu-text">Customers</div>
+                        <div class="menu-arrow">›</div>
+                    </button>
+                    <button class="menu-item" data-menu="reports">
+                        <div class="menu-icon">📈</div>
+                        <div class="menu-text">Reports</div>
+                        <div class="menu-arrow">›</div>
+                    </button>
+                    <button class="menu-item" data-menu="recurring">
+                        <div class="menu-icon">🔄</div>
+                        <div class="menu-text">Recurring Invoices</div>
+                        <div class="menu-arrow">›</div>
+                    </button>
+                    <button class="menu-item" id="btn-export">
+                        <div class="menu-icon">📥</div>
+                        <div class="menu-text">Export to CSV</div>
+                        <div class="menu-arrow">›</div>
+                    </button>
+                </div>
+
+                <div class="menu-section">Settings</div>
+                <div class="menu-grid">
+                    <button class="menu-item" data-menu="settings">
+                        <div class="menu-icon">⚙️</div>
+                        <div class="menu-text">Business Profile</div>
+                        <div class="menu-arrow">›</div>
+                    </button>
+                    <div class="menu-item" id="dark-toggle">
+                        <div class="menu-icon">🌙</div>
+                        <div class="menu-text">Dark Mode</div>
+                        <div class="menu-toggle ${isDark ? 'active' : ''}"></div>
+                    </div>
+                    <button class="menu-item" id="btn-logout" style="color: #dc2626;">
+                        <div class="menu-icon">🚪</div>
+                        <div class="menu-text" style="color: #dc2626;">Logout</div>
+                        <div class="menu-arrow">›</div>
+                    </button>
+                </div>
+            `;
+        }
+
+        function renderCustomersPage() {
+            return `
+                <button class="back-btn" data-back>← Back</button>
+                <div class="section-header">
+                    <div class="section-title">Customers</div>
+                    <button class="section-link" id="btn-add-customer">+ Add</button>
+                </div>
+                ${state.customers.length === 0 ? 
+                    '<div class="empty"><div class="empty-icon">👥</div>No customers yet</div>' :
+                    state.customers.map(cust => {
+                        const owed = state.invoices.filter(i => i.customer_id === cust.id).reduce((s, i) => s + (i.amount - i.amount_paid), 0);
+                        return `
+                            <div class="customer-card">
+                                <div class="customer-info">
+                                    <div>
+                                        <div class="customer-name">${cust.name}</div>
+                                        <div class="customer-phone">${cust.phone}</div>
+                                    </div>
+                                    <div class="customer-balance" style="color: ${owed > 0 ? '#dc2626' : '#16a34a'}">
+                                        ${owed > 0 ? 'Owes ' + formatNaira(owed) : 'Clear ✓'}
+                                    </div>
+                                </div>
+                                <div class="customer-actions">
+                                    <button class="card-btn btn-edit" data-edit-cust="${cust.id}">✏️ Edit</button>
+                                    <button class="card-btn btn-pdf" data-delete-cust="${cust.id}">🗑️ Delete</button>
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+            `;
+        }
+
+        function renderReportsPage() {
+            const totalInvoiced = state.invoices.reduce((s, i) => s + Number(i.amount), 0);
+            const totalCollected = state.invoices.reduce((s, i) => s + Number(i.amount_paid), 0);
+            const collectionRate = totalInvoiced > 0 ? ((totalCollected / totalInvoiced) * 100).toFixed(1) : 0;
+            const overdueInvoices = state.invoices.filter(i => getStatus(i) === 'overdue');
+            const overdueAmount = overdueInvoices.reduce((s, i) => s + (Number(i.amount) - Number(i.amount_paid)), 0);
+
+            const customerDebts = state.customers.map(c => {
+                const custInv = state.invoices.filter(i => i.customer_id === c.id);
+                return { name: c.name, owed: custInv.reduce((s, i) => s + (Number(i.amount) - Number(i.amount_paid)), 0) };
+            }).filter(c => c.owed > 0).sort((a, b) => b.owed - a.owed).slice(0, 5);
+
+            return `
+                <button class="back-btn" data-back>← Back</button>
+                <div class="section-title" style="margin-bottom: 16px;">📈 Reports</div>
+
+                <div class="report-card">
+                    <div class="report-title">💰 Summary</div>
+                    <div class="report-row"><span class="report-label">Total Invoiced</span><span class="report-value">${formatNaira(totalInvoiced)}</span></div>
+                    <div class="report-row"><span class="report-label">Total Collected</span><span class="report-value green">${formatNaira(totalCollected)}</span></div>
+                    <div class="report-row"><span class="report-label">Outstanding</span><span class="report-value red">${formatNaira(totalInvoiced - totalCollected)}</span></div>
+                    <div class="report-row"><span class="report-label">Collection Rate</span><span class="report-value">${collectionRate}%</span></div>
+                </div>
+
+                <div class="report-card">
+                    <div class="report-title">⚠️ Overdue</div>
+                    <div class="report-row"><span class="report-label">Overdue Invoices</span><span class="report-value red">${overdueInvoices.length}</span></div>
+                    <div class="report-row"><span class="report-label">Overdue Amount</span><span class="report-value red">${formatNaira(overdueAmount)}</span></div>
+                </div>
+
+                <div class="report-card">
+                    <div class="report-title">🔴 Top Debtors</div>
+                    ${customerDebts.length === 0 ? '<div style="color:#999;padding:10px 0;">No outstanding debts! 🎉</div>' :
+                        customerDebts.map((c, i) => `
+                            <div class="report-row">
+                                <span class="report-label">${i + 1}. ${c.name}</span>
+                                <span class="report-value red">${formatNaira(c.owed)}</span>
+                            </div>
+                        `).join('')}
+                </div>
+            `;
+        }
+
+        function renderRecurringPage() {
+            return `
+                <button class="back-btn" data-back>← Back</button>
+                <div class="section-header">
+                    <div class="section-title">🔄 Recurring</div>
+                    <button class="section-link" id="btn-add-recurring">+ Add</button>
+                </div>
+                ${state.recurringTemplates.length === 0 ? 
+                    '<div class="empty"><div class="empty-icon">🔄</div>No recurring invoices yet.<br>Auto-generate invoices monthly!</div>' :
+                    state.recurringTemplates.map(tmpl => {
+                        const cust = state.customers.find(c => c.id === tmpl.customerId);
+                        return `
+                            <div class="card">
+                                <div class="card-top">
+                                    <div>
+                                        <div class="card-name">${cust?.name || 'Unknown'}<span class="recurring-badge">${tmpl.frequency}</span></div>
+                                        <div class="card-desc">${tmpl.description}</div>
+                                    </div>
+                                    <div class="card-amount">
+                                        ${formatNaira(tmpl.amount)}
+                                        <div class="badge ${tmpl.active ? 'badge-paid' : 'badge-pending'}">${tmpl.active ? 'Active' : 'Paused'}</div>
+                                    </div>
+                                </div>
+                                <div class="card-actions">
+                                    <button class="card-btn btn-pay" data-generate="${tmpl.id}">⚡ Generate</button>
+                                    <button class="card-btn btn-edit" data-toggle-rec="${tmpl.id}">${tmpl.active ? '⏸️' : '▶️'}</button>
+                                    <button class="card-btn btn-pdf" data-delete-rec="${tmpl.id}">🗑️</button>
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+            `;
+        }
+
+        function renderSettingsPage() {
+            const p = state.businessProfile;
+            const r = state.reminderSettings || { before_due_days: 3, on_due_date: true, after_due_days: [3, 7], enabled: false };
+            
+            return `
+                <button class="back-btn" data-back>← Back</button>
+                <div class="section-title" style="margin-bottom: 16px;">⚙️ Business Profile</div>
+                <p style="color:#666;margin-bottom:20px;font-size:14px;">This info appears on your PDF invoices</p>
+                <div class="form-group">
+                    <label class="form-label">Business Name</label>
+                    <input type="text" class="form-input" id="set-name" value="${p.name || ''}" placeholder="Your Business Name">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Phone Number</label>
+                    <input type="text" class="form-input" id="set-phone" value="${p.phone || ''}" placeholder="08012345678">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Address</label>
+                    <input type="text" class="form-input" id="set-address" value="${p.address || ''}" placeholder="Business Address">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Bank Details</label>
+                    <textarea class="form-input" id="set-bank" rows="3" placeholder="Bank Name&#10;Account Number&#10;Account Name">${p.bank || ''}</textarea>
+                </div>
+
+                <button class="btn btn-primary" id="btn-save-settings" style="margin-top:16px;">Save Profile</button>
+
+                <div class="section-title" style="margin: 32px 0 16px;">🔔 Auto Reminders</div>
+                <p style="color:#666;margin-bottom:20px;font-size:14px;">Automatically remind customers about unpaid invoices</p>
+                
+                <div class="card" style="padding:20px;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                        <div>
+                            <div style="font-weight:600;">Enable Auto Reminders</div>
+                            <div style="font-size:13px;color:#666;">Send SMS reminders automatically</div>
+                        </div>
+                        <div class="menu-toggle ${r.enabled ? 'active' : ''}" id="toggle-reminders"></div>
+                    </div>
+
+                    <div id="reminder-options" class="${r.enabled ? '' : 'hidden'}">
+                        <div class="form-group">
+                            <label class="form-label">Days before due date</label>
+                            <select class="form-input" id="rem-before">
+                                <option value="1" ${r.before_due_days === 1 ? 'selected' : ''}>1 day before</option>
+                                <option value="2" ${r.before_due_days === 2 ? 'selected' : ''}>2 days before</option>
+                                <option value="3" ${r.before_due_days === 3 ? 'selected' : ''}>3 days before</option>
+                                <option value="5" ${r.before_due_days === 5 ? 'selected' : ''}>5 days before</option>
+                                <option value="7" ${r.before_due_days === 7 ? 'selected' : ''}>7 days before</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" style="display:flex;align-items:center;gap:10px;">
+                                <input type="checkbox" id="rem-due" ${r.on_due_date ? 'checked' : ''} style="width:20px;height:20px;">
+                                Remind on due date
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Overdue reminders</label>
+                            <div style="display:flex;flex-wrap:wrap;gap:8px;">
+                                <label style="display:flex;align-items:center;gap:6px;font-size:14px;">
+                                    <input type="checkbox" id="rem-over-3" ${r.after_due_days?.includes(3) ? 'checked' : ''}> 3 days
+                                </label>
+                                <label style="display:flex;align-items:center;gap:6px;font-size:14px;">
+                                    <input type="checkbox" id="rem-over-7" ${r.after_due_days?.includes(7) ? 'checked' : ''}> 7 days
+                                </label>
+                                <label style="display:flex;align-items:center;gap:6px;font-size:14px;">
+                                    <input type="checkbox" id="rem-over-14" ${r.after_due_days?.includes(14) ? 'checked' : ''}> 14 days
+                                </label>
+                                <label style="display:flex;align-items:center;gap:6px;font-size:14px;">
+                                    <input type="checkbox" id="rem-over-30" ${r.after_due_days?.includes(30) ? 'checked' : ''}> 30 days
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="btn btn-primary" id="btn-save-reminders" style="margin-top:16px;">Save Reminder Settings</button>
+
+                <button class="btn btn-secondary" id="btn-send-all-overdue" style="margin-top:12px;">📢 Send All Overdue Reminders Now</button>
+            `;
+        }
+
+        // ========== EVENTS ==========
+        function attachAuthEvents() {
+            let isLogin = true;
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.onclick = () => {
+                    isLogin = tab.dataset.tab === 'login';
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    document.getElementById('name-group').classList.toggle('hidden', isLogin);
+                    document.getElementById('auth-btn').textContent = isLogin ? 'Login' : 'Sign Up';
+                    document.getElementById('auth-error').classList.add('hidden');
+                    document.getElementById('auth-success').classList.add('hidden');
+                };
+            });
+
+            document.getElementById('auth-form').onsubmit = async (e) => {
+                e.preventDefault();
+                const btn = document.getElementById('auth-btn');
+                const email = document.getElementById('auth-email').value;
+                const password = document.getElementById('auth-password').value;
+                const name = document.getElementById('auth-name').value;
+
+                btn.disabled = true;
+                btn.textContent = 'Please wait...';
+
+                try {
+                    if (isLogin) {
+                        const data = await supabaseAuth('token?grant_type=password', { email, password });
+                        saveSession(data);
+                        state.user = data.user;
+                        await loadData();
+                        render();
+                    } else {
+                        await supabaseAuth('signup', { email, password, data: { business_name: name } });
+                        document.getElementById('auth-success').textContent = 'Account created! Check email to confirm.';
+                        document.getElementById('auth-success').classList.remove('hidden');
+                        btn.disabled = false;
+                        btn.textContent = 'Sign Up';
+                    }
+                } catch (err) {
+                    document.getElementById('auth-error').textContent = err.message;
+                    document.getElementById('auth-error').classList.remove('hidden');
+                    btn.disabled = false;
+                    btn.textContent = isLogin ? 'Login' : 'Sign Up';
+                }
+            };
+        }
+
+        function attachAppEvents() {
+            // Navigation
+            document.querySelectorAll('.nav-item').forEach(btn => {
+                btn.onclick = () => { state.activeTab = btn.dataset.tab; state.menuPage = null; state.searchQuery = ''; render(); };
+            });
+
+            // Quick Actions
+            document.getElementById('btn-new-invoice')?.addEventListener('click', showInvoiceModal);
+            document.getElementById('btn-new-customer')?.addEventListener('click', showCustomerModal);
+            document.querySelector('[data-goto="invoices"]')?.addEventListener('click', () => { state.activeTab = 'invoices'; render(); });
+
+            // AI
+            document.getElementById('btn-ai')?.addEventListener('click', showAIModal);
+
+            // Search & Filter
+            document.getElementById('search-input')?.addEventListener('input', (e) => { state.searchQuery = e.target.value; render(); });
+            document.querySelectorAll('[data-filter]').forEach(btn => {
+                btn.onclick = () => { state.filterStatus = btn.dataset.filter; render(); };
+            });
+
+            // Invoice Actions
+            document.querySelectorAll('[data-pdf]').forEach(btn => { btn.onclick = () => generatePDF(btn.dataset.pdf); });
+            document.querySelectorAll('[data-whatsapp]').forEach(btn => { btn.onclick = () => sendWhatsApp(btn.dataset.whatsapp); });
+            document.querySelectorAll('[data-sms]').forEach(btn => { btn.onclick = () => sendSMS(btn.dataset.sms); });
+            document.querySelectorAll('[data-paylink]').forEach(btn => { btn.onclick = () => generatePaymentLink(btn.dataset.paylink); });
+            document.querySelectorAll('[data-pay]').forEach(btn => { btn.onclick = () => showPaymentModal(btn.dataset.pay); });
+            document.querySelectorAll('[data-edit-inv]').forEach(btn => { btn.onclick = () => showEditInvoiceModal(btn.dataset.editInv); });
+
+            // Menu Navigation
+            document.querySelectorAll('[data-menu]').forEach(btn => {
+                btn.onclick = () => { state.menuPage = btn.dataset.menu; render(); };
+            });
+            document.querySelector('[data-back]')?.addEventListener('click', () => { state.menuPage = null; render(); });
+
+            // Menu Actions
+            document.getElementById('btn-export')?.addEventListener('click', exportCSV);
+            document.getElementById('dark-toggle')?.addEventListener('click', toggleDarkMode);
+            document.getElementById('btn-logout')?.addEventListener('click', () => { clearSession(); state.user = null; render(); });
+
+            // Customers Page
+            document.getElementById('btn-add-customer')?.addEventListener('click', showCustomerModal);
+            document.querySelectorAll('[data-edit-cust]').forEach(btn => { btn.onclick = () => showEditCustomerModal(btn.dataset.editCust); });
+            document.querySelectorAll('[data-delete-cust]').forEach(btn => { btn.onclick = () => deleteCustomer(btn.dataset.deleteCust); });
+
+            // Settings Page
+            document.getElementById('btn-save-settings')?.addEventListener('click', saveSettings);
+
+            // Recurring Page
+            document.getElementById('btn-add-recurring')?.addEventListener('click', showRecurringModal);
+            document.querySelectorAll('[data-generate]').forEach(btn => { btn.onclick = () => generateRecurring(btn.dataset.generate); });
+            document.querySelectorAll('[data-toggle-rec]').forEach(btn => {
+                btn.onclick = () => {
+                    const tmpl = state.recurringTemplates.find(t => t.id === btn.dataset.toggleRec);
+                    if (tmpl) { tmpl.active = !tmpl.active; localStorage.setItem('owomi_recurring', JSON.stringify(state.recurringTemplates)); render(); }
+                };
+            });
+            document.querySelectorAll('[data-delete-rec]').forEach(btn => {
+                btn.onclick = () => {
+                    if (confirm('Delete this recurring template?')) {
+                        state.recurringTemplates = state.recurringTemplates.filter(t => t.id !== btn.dataset.deleteRec);
+                        localStorage.setItem('owomi_recurring', JSON.stringify(state.recurringTemplates));
+                        render();
+                    }
+                };
+            });
+
+            // Reminder settings
+            document.getElementById('toggle-reminders')?.addEventListener('click', function() {
+                this.classList.toggle('active');
+                document.getElementById('reminder-options')?.classList.toggle('hidden');
+            });
+
+            document.getElementById('btn-save-reminders')?.addEventListener('click', saveReminderSettings);
+            document.getElementById('btn-send-all-overdue')?.addEventListener('click', sendAllOverdueReminders);
+        }
+
+        // ========== REMINDER FUNCTIONS ==========
+        async function saveReminderSettings() {
+            const session = getSession();
+            const enabled = document.getElementById('toggle-reminders')?.classList.contains('active');
+            const before_due_days = parseInt(document.getElementById('rem-before')?.value) || 3;
+            const on_due_date = document.getElementById('rem-due')?.checked || false;
+            
+            const after_due_days = [];
+            if (document.getElementById('rem-over-3')?.checked) after_due_days.push(3);
+            if (document.getElementById('rem-over-7')?.checked) after_due_days.push(7);
+            if (document.getElementById('rem-over-14')?.checked) after_due_days.push(14);
+            if (document.getElementById('rem-over-30')?.checked) after_due_days.push(30);
+
+            const data = {
+                user_id: session.user.id,
+                enabled,
+                before_due_days,
+                on_due_date,
+                after_due_days,
+                reminder_channel: 'sms'
+            };
+
+            try {
+                if (state.reminderSettings?.id) {
+                    await supabaseQuery('reminder_settings', {
+                        method: 'PATCH',
+                        query: `id=eq.${state.reminderSettings.id}`,
+                        body: data
+                    });
+                } else {
+                    const result = await supabaseQuery('reminder_settings', {
+                        method: 'POST',
+                        body: data
+                    });
+                    state.reminderSettings = result[0];
+                }
+                state.reminderSettings = { ...state.reminderSettings, ...data };
+                alert('✅ Reminder settings saved!');
+            } catch (err) {
+                alert('❌ Error: ' + err.message);
+            }
+        }
+
+        async function sendAllOverdueReminders() {
+            const overdue = state.invoices.filter(i => getStatus(i) === 'overdue');
+            if (overdue.length === 0) {
+                alert('No overdue invoices! 🎉');
+                return;
+            }
+
+            if (!confirm(`Send SMS reminders to ${overdue.length} overdue customers?`)) return;
+
+            let sent = 0, failed = 0;
+
+            for (const inv of overdue) {
+                const cust = state.customers.find(c => c.id === inv.customer_id);
+                if (!cust?.phone) { failed++; continue; }
+
+                const owed = inv.amount - inv.amount_paid;
+                const daysOverdue = Math.floor((new Date() - new Date(inv.due_date)) / (1000 * 60 * 60 * 24));
+                const message = `Hi ${cust.name}, OVERDUE: ₦${owed.toLocaleString()} for "${inv.description}" is ${daysOverdue} days late. Please pay immediately. - ${state.businessProfile.name || 'Owo Mi'}`;
+
+                try {
+                    let phone = cust.phone.replace(/\s/g, '');
+                    if (phone.startsWith('0')) phone = '234' + phone.slice(1);
+                    if (!phone.startsWith('234')) phone = '234' + phone;
+
+                    const res = await fetch('https://djqmtzqnwklwnvlqlejj.supabase.co/functions/v1/send-sms', {
+                        method: 'POST',
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${SUPABASE_KEY}`
+                        },
+                        body: JSON.stringify({ phone, message })
+                    });
+
+                    const data = await res.json();
+                    if (data.code === 'ok' || data.message_id) sent++;
+                    else failed++;
+                } catch (err) {
+                    failed++;
+                }
+            }
+
+            alert(`✅ Sent: ${sent}\n❌ Failed: ${failed}`);
+        }
+
+        // ========== MODALS ==========
+        function closeModal() { document.getElementById('modal-container').innerHTML = ''; }
+
+        function showCustomerModal() {
+            document.getElementById('modal-container').innerHTML = `
+                <div class="modal">
+                    <div class="modal-box">
+                        <div class="modal-header">Add Customer<button class="modal-close" id="modal-close">×</button></div>
+                        <div class="modal-body">
+                            <div class="form-group"><label class="form-label">Name</label><input type="text" class="form-input" id="cust-name" placeholder="Customer name"></div>
+                            <div class="form-group"><label class="form-label">Phone</label><input type="text" class="form-input" id="cust-phone" placeholder="08012345678"></div>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-secondary" id="modal-cancel">Cancel</button>
+                            <button class="btn btn-primary" id="modal-save">Add Customer</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('modal-close').onclick = closeModal;
+            document.getElementById('modal-cancel').onclick = closeModal;
+            document.getElementById('modal-save').onclick = async () => {
+                const name = document.getElementById('cust-name').value.trim();
+                const phone = document.getElementById('cust-phone').value.trim();
+                if (!name || !phone) return alert('Please fill all fields');
+                try { await addCustomer(name, phone); closeModal(); render(); } catch (err) { alert('Error: ' + err.message); }
+            };
+        }
+
+        function showInvoiceModal() {
+            if (state.customers.length === 0) { alert('Add a customer first!'); showCustomerModal(); return; }
+            document.getElementById('modal-container').innerHTML = `
+                <div class="modal">
+                    <div class="modal-box">
+                        <div class="modal-header">New Invoice<button class="modal-close" id="modal-close">×</button></div>
+                        <div class="modal-body">
+                            <div class="form-group"><label class="form-label">Customer</label><select class="form-input" id="inv-cust">${state.customers.map(c => `<option value="${c.id}">${c.name}</option>`).join('')}</select></div>
+                            <div class="form-group"><label class="form-label">Description</label><input type="text" class="form-input" id="inv-desc" placeholder="What is this for?"></div>
+                            <div class="form-group"><label class="form-label">Amount (₦)</label><input type="number" class="form-input" id="inv-amount" placeholder="0"></div>
+                            <div class="form-group"><label class="form-label">Due Date</label><input type="date" class="form-input" id="inv-due"></div>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-secondary" id="modal-cancel">Cancel</button>
+                            <button class="btn btn-primary" id="modal-save">Create Invoice</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('modal-close').onclick = closeModal;
+            document.getElementById('modal-cancel').onclick = closeModal;
+            document.getElementById('modal-save').onclick = async () => {
+                const cust = document.getElementById('inv-cust').value;
+                const desc = document.getElementById('inv-desc').value.trim();
+                const amt = parseFloat(document.getElementById('inv-amount').value);
+                const due = document.getElementById('inv-due').value;
+                if (!desc || !amt || !due) return alert('Please fill all fields');
+                try { await addInvoice(cust, desc, amt, due); closeModal(); render(); } catch (err) { alert('Error: ' + err.message); }
+            };
+        }
+
+        function showPaymentModal(invoiceId) {
+            const inv = state.invoices.find(i => i.id === invoiceId);
+            const owed = inv.amount - inv.amount_paid;
+            document.getElementById('modal-container').innerHTML = `
+                <div class="modal">
+                    <div class="modal-box">
+                        <div class="modal-header">Record Payment<button class="modal-close" id="modal-close">×</button></div>
+                        <div class="modal-body">
+                            <p style="margin-bottom:20px;color:#666;">Outstanding: <strong style="color:#dc2626;">${formatNaira(owed)}</strong></p>
+                            <div class="form-group"><label class="form-label">Payment Amount (₦)</label><input type="number" class="form-input" id="pay-amount" placeholder="0" max="${owed}"></div>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-secondary" id="modal-cancel">Cancel</button>
+                            <button class="btn btn-primary" id="modal-save">Record Payment</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('modal-close').onclick = closeModal;
+            document.getElementById('modal-cancel').onclick = closeModal;
+            document.getElementById('modal-save').onclick = async () => {
+                const amt = parseFloat(document.getElementById('pay-amount').value);
+                if (!amt || amt <= 0) return alert('Enter a valid amount');
+                try { await recordPayment(invoiceId, amt); closeModal(); render(); } catch (err) { alert('Error: ' + err.message); }
+            };
+        }
+
+        function showEditInvoiceModal(invoiceId) {
+            const inv = state.invoices.find(i => i.id === invoiceId);
+            document.getElementById('modal-container').innerHTML = `
+                <div class="modal">
+                    <div class="modal-box">
+                        <div class="modal-header">Edit Invoice<button class="modal-close" id="modal-close">×</button></div>
+                        <div class="modal-body">
+                            <div class="form-group"><label class="form-label">Description</label><input type="text" class="form-input" id="edit-desc" value="${inv.description}"></div>
+                            <div class="form-group"><label class="form-label">Amount (₦)</label><input type="number" class="form-input" id="edit-amt" value="${inv.amount}"></div>
+                            <div class="form-group"><label class="form-label">Due Date</label><input type="date" class="form-input" id="edit-due" value="${inv.due_date}"></div>
+                            <button class="btn btn-danger" id="btn-delete-inv" style="margin-top:12px;">🗑️ Delete Invoice</button>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-secondary" id="modal-cancel">Cancel</button>
+                            <button class="btn btn-primary" id="modal-save">Save</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('modal-close').onclick = closeModal;
+            document.getElementById('modal-cancel').onclick = closeModal;
+            document.getElementById('btn-delete-inv').onclick = async () => {
+                if (confirm('Delete this invoice?')) {
+                    await supabaseQuery('invoices', { method: 'DELETE', query: `id=eq.${invoiceId}` });
+                    state.invoices = state.invoices.filter(i => i.id !== invoiceId);
+                    closeModal(); render();
+                }
+            };
+            document.getElementById('modal-save').onclick = async () => {
+                const desc = document.getElementById('edit-desc').value.trim();
+                const amt = parseFloat(document.getElementById('edit-amt').value);
+                const due = document.getElementById('edit-due').value;
+                if (!desc || !amt || !due) return alert('Please fill all fields');
+                await supabaseQuery('invoices', { method: 'PATCH', query: `id=eq.${invoiceId}`, body: { description: desc, amount: amt, due_date: due } });
+                const idx = state.invoices.findIndex(i => i.id === invoiceId);
+                state.invoices[idx] = { ...state.invoices[idx], description: desc, amount: amt, due_date: due };
+                closeModal(); render();
+            };
+        }
+
+        function showEditCustomerModal(customerId) {
+            const cust = state.customers.find(c => c.id === customerId);
+            document.getElementById('modal-container').innerHTML = `
+                <div class="modal">
+                    <div class="modal-box">
+                        <div class="modal-header">Edit Customer<button class="modal-close" id="modal-close">×</button></div>
+                        <div class="modal-body">
+                            <div class="form-group"><label class="form-label">Name</label><input type="text" class="form-input" id="edit-name" value="${cust.name}"></div>
+                            <div class="form-group"><label class="form-label">Phone</label><input type="text" class="form-input" id="edit-phone" value="${cust.phone}"></div>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-secondary" id="modal-cancel">Cancel</button>
+                            <button class="btn btn-primary" id="modal-save">Save</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('modal-close').onclick = closeModal;
+            document.getElementById('modal-cancel').onclick = closeModal;
+            document.getElementById('modal-save').onclick = async () => {
+                const name = document.getElementById('edit-name').value.trim();
+                const phone = document.getElementById('edit-phone').value.trim();
+                if (!name || !phone) return alert('Please fill all fields');
+                await supabaseQuery('customers', { method: 'PATCH', query: `id=eq.${customerId}`, body: { name, phone } });
+                const idx = state.customers.findIndex(c => c.id === customerId);
+                state.customers[idx] = { ...state.customers[idx], name, phone };
+                closeModal(); render();
+            };
+        }
+
+        async function deleteCustomer(customerId) {
+            if (!confirm('Delete customer and all their invoices?')) return;
+            await supabaseQuery('invoices', { method: 'DELETE', query: `customer_id=eq.${customerId}` });
+            await supabaseQuery('customers', { method: 'DELETE', query: `id=eq.${customerId}` });
+            state.customers = state.customers.filter(c => c.id !== customerId);
+            state.invoices = state.invoices.filter(i => i.customer_id !== customerId);
+            render();
+        }
+
+        function showRecurringModal() {
+            if (state.customers.length === 0) { alert('Add a customer first!'); return; }
+            document.getElementById('modal-container').innerHTML = `
+                <div class="modal">
+                    <div class="modal-box">
+                        <div class="modal-header">New Recurring<button class="modal-close" id="modal-close">×</button></div>
+                        <div class="modal-body">
+                            <div class="form-group"><label class="form-label">Customer</label><select class="form-input" id="rec-cust">${state.customers.map(c => `<option value="${c.id}">${c.name}</option>`).join('')}</select></div>
+                            <div class="form-group"><label class="form-label">Description</label><input type="text" class="form-input" id="rec-desc" placeholder="e.g. Monthly Retainer"></div>
+                            <div class="form-group"><label class="form-label">Amount (₦)</label><input type="number" class="form-input" id="rec-amt" placeholder="0"></div>
+                            <div class="form-group"><label class="form-label">Frequency</label><select class="form-input" id="rec-freq"><option value="weekly">Weekly</option><option value="monthly" selected>Monthly</option><option value="quarterly">Quarterly</option></select></div>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-secondary" id="modal-cancel">Cancel</button>
+                            <button class="btn btn-primary" id="modal-save">Create</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('modal-close').onclick = closeModal;
+            document.getElementById('modal-cancel').onclick = closeModal;
+            document.getElementById('modal-save').onclick = () => {
+                const cust = document.getElementById('rec-cust').value;
+                const desc = document.getElementById('rec-desc').value.trim();
+                const amt = parseFloat(document.getElementById('rec-amt').value);
+                const freq = document.getElementById('rec-freq').value;
+                if (!desc || !amt) return alert('Please fill all fields');
+                state.recurringTemplates.push({ id: Date.now().toString(), customerId: cust, description: desc, amount: amt, frequency: freq, active: true });
+                localStorage.setItem('owomi_recurring', JSON.stringify(state.recurringTemplates));
+                closeModal(); render();
+            };
+        }
+
+        async function generateRecurring(templateId) {
+            const tmpl = state.recurringTemplates.find(t => t.id === templateId);
+            if (!tmpl) return;
+            const due = new Date();
+            due.setDate(due.getDate() + 30);
+            try {
+                await addInvoice(tmpl.customerId, tmpl.description + ' (Auto)', tmpl.amount, due.toISOString().split('T')[0]);
+                alert('Invoice generated!');
+                render();
+            } catch (err) { alert('Error: ' + err.message); }
+        }
+
+        function showAIModal() {
+            document.getElementById('modal-container').innerHTML = `
+                <div class="modal ai-modal">
+                    <div class="modal-box">
+                        <div class="modal-header">🤖 AI Assistant<button class="modal-close" id="modal-close">×</button></div>
+                        <div class="ai-messages" id="ai-messages">
+                            <div class="ai-msg assistant"><div class="ai-bubble">Hello! Ask me about your business - "Who owes me?", "Wetin be my total?", or "Give me insights". I understand English and Pidgin! 🇳🇬</div></div>
+                        </div>
+                        <div class="ai-input-area">
+                            <input type="text" class="ai-input" id="ai-input" placeholder="Ask about your business...">
+                            <button class="ai-send" id="ai-send">➤</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('modal-close').onclick = closeModal;
+            document.getElementById('ai-send').onclick = sendAIMessage;
+            document.getElementById('ai-input').onkeypress = (e) => { if (e.key === 'Enter') sendAIMessage(); };
+        }
+
+        async function sendAIMessage() {
+            const input = document.getElementById('ai-input');
+            const messages = document.getElementById('ai-messages');
+            const userText = input.value.trim();
+            if (!userText) return;
+
+            messages.innerHTML += `<div class="ai-msg user"><div class="ai-bubble">${userText}</div></div>`;
+            input.value = '';
+            messages.innerHTML += `<div class="ai-msg assistant" id="typing"><div class="ai-bubble"><div class="typing"><span></span><span></span><span></span></div></div></div>`;
+            messages.scrollTop = messages.scrollHeight;
+
+            const outstanding = state.invoices.filter(i => getStatus(i) !== 'paid').reduce((s, i) => s + (i.amount - i.amount_paid), 0);
+            const collected = state.invoices.reduce((s, i) => s + Number(i.amount_paid), 0);
+            const context = `BUSINESS DATA:\n- Customers: ${state.customers.length}\n- Invoices: ${state.invoices.length}\n- Outstanding: ₦${outstanding.toLocaleString()}\n- Collected: ₦${collected.toLocaleString()}\n\nCUSTOMERS:\n${state.customers.map(c => {
+                const owed = state.invoices.filter(i => i.customer_id === c.id).reduce((s, i) => s + (i.amount - i.amount_paid), 0);
+                return `- ${c.name}: owes ₦${owed.toLocaleString()}`;
+            }).join('\n')}`;
+
+            try {
+                const res = await fetch('https://djqmtzqnwklwnvlqlejj.supabase.co/functions/v1/ai-chat', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${SUPABASE_KEY}`
+                    },
+                    body: JSON.stringify({ message: userText, context })
+                });
+                const data = await res.json();
+                
+                let reply = "Sorry, couldn't process that.";
+                if (data.content && data.content[0] && data.content[0].text) {
+                    reply = data.content[0].text;
+                } else if (data.error) {
+                    reply = "Error: " + (typeof data.error === 'string' ? data.error : JSON.stringify(data.error));
+                } else if (typeof data === 'string') {
+                    reply = data;
+                }
+                
+                document.getElementById('typing')?.remove();
+                messages.innerHTML += `<div class="ai-msg assistant"><div class="ai-bubble">${reply}</div></div>`;
+            } catch (err) {
+                document.getElementById('typing')?.remove();
+                messages.innerHTML += `<div class="ai-msg assistant"><div class="ai-bubble">Sorry, error connecting to AI: ${err.message}</div></div>`;
+            }
+            messages.scrollTop = messages.scrollHeight;
+        }
+
+        // ========== UTILITIES ==========
+        function generatePDF(invoiceId) {
+            const inv = state.invoices.find(i => i.id === invoiceId);
+            const cust = state.customers.find(c => c.id === inv.customer_id);
+            const status = getStatus(inv);
+            const p = state.businessProfile;
+
+            const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Invoice</title><style>body{font-family:Arial,sans-serif;padding:40px;max-width:800px;margin:0 auto}.header{text-align:center;border-bottom:3px solid #6366f1;padding-bottom:20px;margin-bottom:30px}.header h1{color:#6366f1;margin:0}.details{display:flex;justify-content:space-between;margin-bottom:30px}.box{background:#f9f9f9;padding:15px;border-radius:8px;width:48%}.box h3{margin:0 0 10px;color:#6366f1;font-size:14px}table{width:100%;border-collapse:collapse;margin-bottom:30px}th{background:#6366f1;color:white;padding:12px;text-align:left}td{padding:12px;border-bottom:1px solid #eee}.total{background:#f9f9f9;font-weight:bold}.status{display:inline-block;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:bold}.paid{background:#dcfce7;color:#166534}.pending{background:#fef3c7;color:#854d0e}.overdue{background:#fee2e2;color:#dc2626}.footer{text-align:center;color:#999;font-size:12px;margin-top:40px}@media print{body{padding:20px}}</style></head><body><div class="header"><h1>${p.name || 'Owo Mi 💰'}</h1><p>${p.phone || ''} ${p.address ? '• ' + p.address : ''}</p></div><h2>INVOICE <span class="status ${status}">${status.toUpperCase()}</span></h2><div class="details"><div class="box"><h3>BILL TO</h3><p><strong>${cust?.name || 'Customer'}</strong></p><p>${cust?.phone || ''}</p></div><div class="box"><h3>DETAILS</h3><p>Invoice: ${inv.id.slice(0, 8).toUpperCase()}</p><p>Due: ${formatDate(inv.due_date)}</p></div></div>${p.bank ? `<div class="box" style="width:100%;margin-bottom:20px"><h3>PAYMENT DETAILS</h3><p style="white-space:pre-line">${p.bank}</p></div>` : ''}<table><thead><tr><th>Description</th><th style="text-align:right">Amount</th></tr></thead><tbody><tr><td>${inv.description}</td><td style="text-align:right">${formatNaira(inv.amount)}</td></tr><tr><td>Amount Paid</td><td style="text-align:right;color:#16a34a">-${formatNaira(inv.amount_paid)}</td></tr><tr class="total"><td><strong>Balance Due</strong></td><td style="text-align:right;color:${inv.amount - inv.amount_paid > 0 ? '#dc2626' : '#16a34a'}"><strong>${formatNaira(inv.amount - inv.amount_paid)}</strong></td></tr></tbody></table><div class="footer"><p>Thank you for your business!</p><p>Generated by Owo Mi</p></div></body></html>`;
+
+            const win = window.open('', '_blank');
+            win.document.write(html);
+            win.document.close();
+            setTimeout(() => win.print(), 500);
+        }
+
+        function sendWhatsApp(invoiceId) {
+            const inv = state.invoices.find(i => i.id === invoiceId);
+            const cust = state.customers.find(c => c.id === inv.customer_id);
+            const owed = inv.amount - inv.amount_paid;
+            let phone = cust?.phone?.replace(/\s/g, '') || '';
+            if (phone.startsWith('0')) phone = '234' + phone.slice(1);
+            const msg = `Hello ${cust?.name},\n\nReminder: Your invoice of ${formatNaira(inv.amount)} for "${inv.description}" has ${formatNaira(owed)} outstanding.\n\nDue: ${formatDate(inv.due_date)}\n\nThank you!\n- Sent via Owo Mi`;
+            window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
+        }
+
+        async function sendSMS(invoiceId) {
+            const inv = state.invoices.find(i => i.id === invoiceId);
+            const cust = state.customers.find(c => c.id === inv.customer_id);
+            const owed = inv.amount - inv.amount_paid;
+
+            let phone = cust?.phone?.replace(/\s/g, '') || '';
+            if (phone.startsWith('0')) phone = '234' + phone.slice(1);
+            if (!phone.startsWith('234')) phone = '234' + phone;
+
+            const message = `Hi ${cust?.name}, reminder: Your invoice of ${formatNaira(owed)} for "${inv.description}" is due ${formatDate(inv.due_date)}. Please pay promptly. - ${state.businessProfile.name || 'Owo Mi'}`;
+
+            try {
+                const btn = document.querySelector(`[data-sms="${invoiceId}"]`);
+                if (btn) btn.textContent = '⏳';
+
+                const res = await fetch('https://djqmtzqnwklwnvlqlejj.supabase.co/functions/v1/send-sms', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${SUPABASE_KEY}`
+                    },
+                    body: JSON.stringify({ phone, message })
+                });
+
+                const data = await res.json();
+                
+                if (data.code === 'ok' || data.message_id) {
+                    alert(`✅ SMS sent to ${cust?.name}!`);
+                } else {
+                    throw new Error(data.message || 'SMS failed');
+                }
+            } catch (err) {
+                alert('❌ SMS Error: ' + err.message);
+            }
+            render();
+        }
+
+        async function generatePaymentLink(invoiceId) {
+            const inv = state.invoices.find(i => i.id === invoiceId);
+            const cust = state.customers.find(c => c.id === inv.customer_id);
+            const owed = inv.amount - inv.amount_paid;
+
+            try {
+                const btn = document.querySelector(`[data-paylink="${invoiceId}"]`);
+                if (btn) btn.textContent = '⏳';
+
+                const res = await fetch('https://djqmtzqnwklwnvlqlejj.supabase.co/functions/v1/create-payment', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${SUPABASE_KEY}`
+                    },
+                    body: JSON.stringify({
+                        email: `${cust?.phone || 'customer'}@owomi.app`,
+                        amount: Math.round(owed * 100),
+                        reference: `owomi_${inv.id}_${Date.now()}`,
+                        metadata: {
+                            invoice_id: inv.id,
+                            customer_name: cust?.name,
+                            description: inv.description
+                        }
+                    })
+                });
+
+                const data = await res.json();
+                
+                if (data.status && data.data?.authorization_url) {
+                    showPaymentLinkModal(data.data.authorization_url, cust?.name, owed, cust?.phone);
+                } else {
+                    throw new Error(data.message || 'Failed to create payment link');
+                }
+            } catch (err) {
+                alert('❌ Payment Link Error: ' + err.message);
+                render();
+            }
+        }
+
+        function showPaymentLinkModal(url, customerName, amount, phone) {
+            const whatsappMsg = `Hi ${customerName}! Here's your payment link for ${formatNaira(amount)}:\n\n${url}\n\nClick to pay securely with card or bank transfer. Thank you!\n- ${state.businessProfile.name || 'Owo Mi'}`;
+            let formattedPhone = phone?.replace(/\s/g, '') || '';
+            if (formattedPhone.startsWith('0')) formattedPhone = '234' + formattedPhone.slice(1);
+
+            document.getElementById('modal-container').innerHTML = `
+                <div class="modal">
+                    <div class="modal-box">
+                        <div class="modal-header">💳 Payment Link Created<button class="modal-close" id="modal-close">×</button></div>
+                        <div class="modal-body">
+                            <p style="margin-bottom:16px;color:#16a34a;font-weight:600;">✅ Payment link ready for ${customerName}!</p>
+                            <p style="margin-bottom:12px;color:#666;">Amount: <strong>${formatNaira(amount)}</strong></p>
+                            
+                            <div style="background:#f5f5f5;padding:12px;border-radius:8px;margin-bottom:16px;word-break:break-all;font-size:13px;">
+                                ${url}
+                            </div>
+
+                            <button class="btn btn-primary" id="btn-copy-link" style="margin-bottom:12px;">📋 Copy Link</button>
+                            <button class="btn btn-whatsapp-send" id="btn-send-whatsapp" style="background:#25D366;color:white;width:100%;padding:16px;border:none;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;">💬 Send via WhatsApp</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('modal-close').onclick = () => { closeModal(); render(); };
+            document.getElementById('btn-copy-link').onclick = () => {
+                navigator.clipboard.writeText(url).then(() => {
+                    document.getElementById('btn-copy-link').textContent = '✅ Copied!';
+                    setTimeout(() => { document.getElementById('btn-copy-link').textContent = '📋 Copy Link'; }, 2000);
+                });
+            };
+            document.getElementById('btn-send-whatsapp').onclick = () => {
+                window.open(`https://wa.me/${formattedPhone}?text=${encodeURIComponent(whatsappMsg)}`, '_blank');
+            };
+        }
+
+        function exportCSV() {
+            let csv = 'Customer,Phone,Description,Amount,Paid,Outstanding,Status,Due Date\n';
+            state.invoices.forEach(inv => {
+                const cust = state.customers.find(c => c.id === inv.customer_id);
+                csv += `"${cust?.name || ''}","${cust?.phone || ''}","${inv.description}",${inv.amount},${inv.amount_paid},${inv.amount - inv.amount_paid},${getStatus(inv)},"${inv.due_date}"\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'owo-mi-invoices.csv';
+            a.click();
+        }
+
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark');
+            localStorage.setItem('owomi_dark', document.body.classList.contains('dark') ? '1' : '0');
+            render();
+        }
+
+        function saveSettings() {
+            state.businessProfile = {
+                name: document.getElementById('set-name').value.trim(),
+                phone: document.getElementById('set-phone').value.trim(),
+                address: document.getElementById('set-address').value.trim(),
+                bank: document.getElementById('set-bank').value.trim()
+            };
+            localStorage.setItem('owomi_business', JSON.stringify(state.businessProfile));
+            alert('Settings saved!');
+        }
+
+        // ========== INIT ==========
+        async function init() {
+            if (localStorage.getItem('owomi_dark') === '1') document.body.classList.add('dark');
+            const session = getSession();
+            if (session?.access_token) {
+                state.user = session.user;
+                await loadData();
+            }
+            state.loading = false;
+            render();
+        }
+
+        init();
+
+        // ========== PWA ==========
+        let deferredPrompt;
+        
+        if ('serviceWorker' in navigator) {
+            const swCode = `
+                const CACHE_NAME = 'owomi-v1';
+                const urlsToCache = ['/'];
+                
+                self.addEventListener('install', e => {
+                    e.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache)));
+                    self.skipWaiting();
+                });
+                
+                self.addEventListener('activate', e => {
+                    e.waitUntil(caches.keys().then(keys => 
+                        Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
+                    ));
+                });
+                
+                self.addEventListener('fetch', e => {
+                    e.respondWith(
+                        fetch(e.request)
+                            .then(res => {
+                                const clone = res.clone();
+                                caches.open(CACHE_NAME).then(cache => cache.put(e.request, clone));
+                                return res;
+                            })
+                            .catch(() => caches.match(e.request))
+                    );
+                });
+            `;
+            
+            const blob = new Blob([swCode], { type: 'application/javascript' });
+            const swUrl = URL.createObjectURL(blob);
+            
+            navigator.serviceWorker.register(swUrl).then(reg => {
+                console.log('SW registered:', reg.scope);
+            }).catch(err => {
+                console.log('SW registration failed:', err);
+            });
+        }
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            if (!localStorage.getItem('owomi_installed')) {
+                setTimeout(showInstallPrompt, 3000);
+            }
+        });
+
+        function showInstallPrompt() {
+            if (!deferredPrompt) return;
+            
+            const prompt = document.createElement('div');
+            prompt.className = 'install-prompt';
+            prompt.innerHTML = `
+                <div class="install-prompt-icon">💰</div>
+                <div class="install-prompt-text">
+                    <div class="install-prompt-title">Install Owo Mi</div>
+                    <div class="install-prompt-desc">Add to home screen for quick access</div>
+                </div>
+                <button class="install-prompt-btn" id="install-btn">Install</button>
+                <button class="install-prompt-close" id="install-close">×</button>
+            `;
+            document.body.appendChild(prompt);
+
+            document.getElementById('install-btn').onclick = async () => {
+                prompt.remove();
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    localStorage.setItem('owomi_installed', '1');
+                }
+                deferredPrompt = null;
+            };
+
+            document.getElementById('install-close').onclick = () => {
+                prompt.remove();
+                localStorage.setItem('owomi_installed', '1');
+            };
+        }
+
+        if (window.matchMedia('(display-mode: standalone)').matches) {
+            console.log('Running as PWA');
+        }
+    </script>
+</body>
+</html>
