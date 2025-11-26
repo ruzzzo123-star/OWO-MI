@@ -1434,17 +1434,16 @@
             }).join('\n')}`;
 
             try {
-                const res = await fetch('https://api.anthropic.com/v1/messages', {
+                const res = await fetch('https://djqmtzqnwklwnvlqlejj.supabase.co/functions/v1/ai-chat', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        model: 'claude-sonnet-4-20250514',
-                        max_tokens: 1024,
-                        messages: [{ role: 'user', content: `You are the AI assistant for "Owo Mi", a Nigerian invoice app. Be friendly and concise. Use Naira (₦). Understand English and Pidgin.\n\n${context}\n\nUser: ${userText}` }]
-                    })
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${SUPABASE_KEY}`
+                    },
+                    body: JSON.stringify({ message: userText, context })
                 });
                 const data = await res.json();
-                const reply = data.content?.[0]?.text || "Sorry, couldn't process that.";
+                const reply = data.content?.[0]?.text || data.error || "Sorry, couldn't process that.";
                 document.getElementById('typing')?.remove();
                 messages.innerHTML += `<div class="ai-msg assistant"><div class="ai-bubble">${reply}</div></div>`;
             } catch {
