@@ -2178,7 +2178,7 @@
                 <div class="landing-section">
                     <nav class="landing-nav">
                         <div class="landing-logo">💰 Owo Mi</div>
-                        <button class="landing-nav-btn" id="landing-get-started">Get Started →</button>
+                        <button class="landing-nav-btn" onclick="goToAuth()">Get Started →</button>
                     </nav>
                     
                     <div class="landing-hero">
@@ -2187,8 +2187,8 @@
                             <h1 class="landing-title">Stop Chasing <span>Payments.</span> Start Growing.</h1>
                             <p class="landing-subtitle">Create invoices in seconds, send reminders via WhatsApp & SMS, and track every kobo your customers owe you.</p>
                             <div class="landing-ctas">
-                                <button class="landing-cta-primary" id="landing-start-free">Start Free Today →</button>
-                                <button class="landing-cta-secondary" id="landing-see-features">See Features ↓</button>
+                                <button class="landing-cta-primary" onclick="goToAuth()">Start Free Today →</button>
+                                <button class="landing-cta-secondary" onclick="document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })">See Features ↓</button>
                             </div>
                             <div class="landing-stats">
                                 <div>
@@ -2288,7 +2288,7 @@
                     <div class="landing-cta-section">
                         <h2>Ready to Get Paid Faster?</h2>
                         <p>Join thousands of Nigerian businesses using Owo Mi.</p>
-                        <button id="landing-cta-btn">Start Free - No Card Needed →</button>
+                        <button onclick="goToAuth()">Start Free - No Card Needed →</button>
                     </div>
                     
                     <footer class="landing-footer">
@@ -2314,6 +2314,11 @@
             render();
         }
         
+        function goToLanding() {
+            state.currentSection = 'landing';
+            render();
+        }
+        
         // ========== ONBOARDING ==========
         function renderOnboarding() {
             const steps = [
@@ -2329,9 +2334,9 @@
             if (state.onboardingStep === 1) {
                 content = `
                     <div class="onboarding-actions">
-                        <button class="onboarding-btn onboarding-btn-primary" id="onboard-next">Let's Go! →</button>
+                        <button class="onboarding-btn onboarding-btn-primary" onclick="nextOnboardingStep()">Let's Go! →</button>
                     </div>
-                    <button class="onboarding-skip" id="onboard-skip">Skip setup, I'll do it later</button>
+                    <button class="onboarding-skip" onclick="completeOnboarding()">Skip setup, I'll do it later</button>
                 `;
             } else if (state.onboardingStep === 2) {
                 content = `
@@ -2346,8 +2351,8 @@
                         </div>
                     </div>
                     <div class="onboarding-actions">
-                        <button class="onboarding-btn onboarding-btn-secondary" id="onboard-prev">← Back</button>
-                        <button class="onboarding-btn onboarding-btn-primary" id="onboard-next">Continue →</button>
+                        <button class="onboarding-btn onboarding-btn-secondary" onclick="prevOnboardingStep()">← Back</button>
+                        <button class="onboarding-btn onboarding-btn-primary" onclick="nextOnboardingStep()">Continue →</button>
                     </div>
                 `;
             } else if (state.onboardingStep === 3) {
@@ -2367,10 +2372,10 @@
                         </div>
                     </div>
                     <div class="onboarding-actions">
-                        <button class="onboarding-btn onboarding-btn-secondary" id="onboard-prev">← Back</button>
-                        <button class="onboarding-btn onboarding-btn-primary" id="onboard-next">Continue →</button>
+                        <button class="onboarding-btn onboarding-btn-secondary" onclick="prevOnboardingStep()">← Back</button>
+                        <button class="onboarding-btn onboarding-btn-primary" onclick="nextOnboardingStep()">Continue →</button>
                     </div>
-                    <button class="onboarding-skip" id="onboard-skip">Skip for now</button>
+                    <button class="onboarding-skip" onclick="completeOnboarding()">Skip for now</button>
                 `;
             } else if (state.onboardingStep === 4) {
                 content = `
@@ -2397,7 +2402,7 @@
                         </div>
                     </div>
                     <div class="onboarding-actions">
-                        <button class="onboarding-btn onboarding-btn-primary" id="onboard-complete" style="width:100%;background:linear-gradient(135deg,#f59e0b,#d97706);">🚀 Start Using Owo Mi</button>
+                        <button class="onboarding-btn onboarding-btn-primary" onclick="completeOnboarding()" style="width:100%;background:linear-gradient(135deg,#f59e0b,#d97706);">🚀 Start Using Owo Mi</button>
                     </div>
                 `;
             }
@@ -2472,22 +2477,22 @@
                         </div>
                         <div id="auth-error" class="error-msg hidden"></div>
                         <div id="auth-success" class="success-msg hidden"></div>
-                        <form id="auth-form">
+                        <div id="auth-form">
                             <div class="form-group hidden" id="name-group">
                                 <label class="form-label">Business Name</label>
                                 <input type="text" class="form-input" id="auth-name" placeholder="Your business name">
                             </div>
                             <div class="form-group">
                                 <label class="form-label">Email</label>
-                                <input type="email" class="form-input" id="auth-email" placeholder="you@example.com" required>
+                                <input type="email" class="form-input" id="auth-email" placeholder="you@example.com">
                             </div>
                             <div class="form-group">
                                 <label class="form-label">Password</label>
-                                <input type="password" class="form-input" id="auth-password" placeholder="••••••••" required minlength="6">
+                                <input type="password" class="form-input" id="auth-password" placeholder="••••••••">
                             </div>
-                            <button type="submit" class="btn btn-primary" id="auth-btn">Login</button>
-                        </form>
-                        <button id="auth-back-btn" style="display:block;width:100%;text-align:center;margin-top:20px;background:none;border:none;color:#888;font-size:14px;cursor:pointer;">← Back to Home</button>
+                            <button type="button" class="btn btn-primary" id="auth-btn" onclick="handleAuthSubmit()">Login</button>
+                        </div>
+                        <button onclick="goToLanding()" style="display:block;width:100%;text-align:center;margin-top:20px;background:none;border:none;color:#888;font-size:14px;cursor:pointer;">← Back to Home</button>
                     </div>
                 </div>
             `;
@@ -3487,15 +3492,117 @@
         }
 
         // ========== EVENTS ==========
+        let authIsLogin = true; // Track login/signup state globally
+        
+        function handleAuthSubmit() {
+            const btn = document.getElementById('auth-btn');
+            const email = document.getElementById('auth-email').value.trim();
+            const password = document.getElementById('auth-password').value;
+            const name = document.getElementById('auth-name')?.value?.trim() || '';
+            
+            // Validation
+            if (!email || !password) {
+                document.getElementById('auth-error').textContent = 'Please fill in all fields';
+                document.getElementById('auth-error').classList.remove('hidden');
+                return;
+            }
+            
+            if (password.length < 6) {
+                document.getElementById('auth-error').textContent = 'Password must be at least 6 characters';
+                document.getElementById('auth-error').classList.remove('hidden');
+                return;
+            }
+            
+            btn.disabled = true;
+            btn.textContent = 'Please wait...';
+            document.getElementById('auth-error').classList.add('hidden');
+            
+            // Use setTimeout to simulate async and allow UI to update
+            setTimeout(function() {
+                if (DEV_MODE) {
+                    // Dev mode: simulate auth
+                    state.user = { id: 'dev-user', email: email, name: name || email.split('@')[0] };
+                    localStorage.setItem('owomi_user', JSON.stringify(state.user));
+                    state.businessProfile.name = name || '';
+                    
+                    // Load default data for new users
+                    if (!localStorage.getItem('owomi_customers')) {
+                        state.customers = [
+                            { id: 'cust-1', name: 'Chidi Okonkwo', phone: '08012345678' },
+                            { id: 'cust-2', name: 'Amaka Johnson', phone: '08098765432' },
+                            { id: 'cust-3', name: 'Emeka Nwosu', phone: '07011223344' }
+                        ];
+                        localStorage.setItem('owomi_customers', JSON.stringify(state.customers));
+                    }
+                    if (!localStorage.getItem('owomi_invoices')) {
+                        state.invoices = [
+                            { id: 'inv-1', invoice_number: 'INV-001', customer_id: 'cust-1', description: 'Website Project', items: [{name: 'Website Design', qty: 1, price: 100000}], amount: 150000, amount_paid: 50000, due_date: '2025-12-20', created_at: '2025-11-01' },
+                            { id: 'inv-2', invoice_number: 'INV-002', customer_id: 'cust-2', description: 'Logo Design', items: [{name: 'Logo Design', qty: 1, price: 75000}], amount: 75000, amount_paid: 75000, due_date: '2025-11-15', created_at: '2025-10-28' }
+                        ];
+                        localStorage.setItem('owomi_invoices', JSON.stringify(state.invoices));
+                    }
+                    
+                    // Load data from localStorage
+                    state.customers = JSON.parse(localStorage.getItem('owomi_customers') || '[]');
+                    state.invoices = JSON.parse(localStorage.getItem('owomi_invoices') || '[]');
+                    
+                    if (authIsLogin) {
+                        // Login - check if onboarded
+                        var onboarded = localStorage.getItem('owomi_onboarded');
+                        state.currentSection = onboarded ? 'app' : 'onboarding';
+                    } else {
+                        // Signup - go to onboarding
+                        state.currentSection = 'onboarding';
+                    }
+                    state.loading = false;
+                    render();
+                } else {
+                    // Production mode with Supabase
+                    if (authIsLogin) {
+                        supabaseAuth('token?grant_type=password', { email: email, password: password })
+                            .then(function(data) {
+                                saveSession(data);
+                                state.user = data.user;
+                                return loadData();
+                            })
+                            .then(function() {
+                                var onboarded = localStorage.getItem('owomi_onboarded');
+                                state.currentSection = onboarded ? 'app' : 'onboarding';
+                                render();
+                            })
+                            .catch(function(err) {
+                                document.getElementById('auth-error').textContent = err.message || 'Login failed';
+                                document.getElementById('auth-error').classList.remove('hidden');
+                                btn.disabled = false;
+                                btn.textContent = 'Login';
+                            });
+                    } else {
+                        supabaseAuth('signup', { email: email, password: password, data: { business_name: name } })
+                            .then(function() {
+                                document.getElementById('auth-success').textContent = 'Account created! Check email to confirm.';
+                                document.getElementById('auth-success').classList.remove('hidden');
+                                btn.disabled = false;
+                                btn.textContent = 'Sign Up';
+                            })
+                            .catch(function(err) {
+                                document.getElementById('auth-error').textContent = err.message || 'Signup failed';
+                                document.getElementById('auth-error').classList.remove('hidden');
+                                btn.disabled = false;
+                                btn.textContent = 'Sign Up';
+                            });
+                    }
+                }
+            }, 500);
+        }
+        
         function attachAuthEvents() {
-            let isLogin = true;
             document.querySelectorAll('.tab').forEach(tab => {
                 tab.onclick = () => {
-                    isLogin = tab.dataset.tab === 'login';
+                    authIsLogin = tab.dataset.tab === 'login';
                     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
                     tab.classList.add('active');
-                    document.getElementById('name-group').classList.toggle('hidden', isLogin);
-                    document.getElementById('auth-btn').textContent = isLogin ? 'Login' : 'Sign Up';
+                    document.getElementById('name-group').classList.toggle('hidden', authIsLogin);
+                    document.getElementById('auth-btn').textContent = authIsLogin ? 'Login' : 'Sign Up';
                     document.getElementById('auth-error').classList.add('hidden');
                     document.getElementById('auth-success').classList.add('hidden');
                 };
@@ -3505,106 +3612,6 @@
             document.getElementById('auth-back-btn')?.addEventListener('click', () => {
                 state.currentSection = 'landing';
                 render();
-            });
-
-            const authForm = document.getElementById('auth-form');
-            if (!authForm) {
-                console.error('Auth form not found!');
-                return;
-            }
-            
-            authForm.onsubmit = async (e) => {
-                e.preventDefault();
-                
-                const btn = document.getElementById('auth-btn');
-                const emailInput = document.getElementById('auth-email');
-                const passwordInput = document.getElementById('auth-password');
-                const nameInput = document.getElementById('auth-name');
-                
-                if (!btn || !emailInput || !passwordInput) {
-                    console.error('Form elements not found');
-                    return;
-                }
-                
-                const email = emailInput.value.trim();
-                const password = passwordInput.value;
-                const name = nameInput?.value?.trim() || '';
-
-                btn.disabled = true;
-                btn.textContent = 'Please wait...';
-
-                try {
-                    // Check if we're in dev mode
-                    const devMode = (typeof DEV_MODE !== 'undefined' && DEV_MODE);
-                    
-                    if (devMode) {
-                        // Dev mode: simulate auth
-                        await new Promise(r => setTimeout(r, 600));
-                        state.user = { id: 'dev-user', email, name: name || email.split('@')[0] };
-                        localStorage.setItem('owomi_user', JSON.stringify(state.user));
-                        state.businessProfile.name = name || '';
-                        
-                        // Load default data for new users
-                        if (!localStorage.getItem('owomi_customers')) {
-                            state.customers = [
-                                { id: 'cust-1', name: 'Chidi Okonkwo', phone: '08012345678' },
-                                { id: 'cust-2', name: 'Amaka Johnson', phone: '08098765432' },
-                                { id: 'cust-3', name: 'Emeka Nwosu', phone: '07011223344' }
-                            ];
-                            localStorage.setItem('owomi_customers', JSON.stringify(state.customers));
-                        }
-                        if (!localStorage.getItem('owomi_invoices')) {
-                            state.invoices = [
-                                { id: 'inv-1', invoice_number: 'INV-001', customer_id: 'cust-1', description: 'Website Project', items: [{name: 'Website Design', qty: 1, price: 100000}], amount: 150000, amount_paid: 50000, due_date: '2025-12-20', created_at: '2025-11-01' },
-                                { id: 'inv-2', invoice_number: 'INV-002', customer_id: 'cust-2', description: 'Logo Design', items: [{name: 'Logo Design', qty: 1, price: 75000}], amount: 75000, amount_paid: 75000, due_date: '2025-11-15', created_at: '2025-10-28' }
-                            ];
-                            localStorage.setItem('owomi_invoices', JSON.stringify(state.invoices));
-                        }
-                        
-                        if (isLogin) {
-                            // Login - check if onboarded
-                            const onboarded = localStorage.getItem('owomi_onboarded');
-                            state.currentSection = onboarded ? 'app' : 'onboarding';
-                        } else {
-                            // Signup - go to onboarding
-                            state.currentSection = 'onboarding';
-                        }
-                        state.loading = false;
-                        render();
-                        return;
-                    }
-                    
-                    if (isLogin) {
-                        const data = await supabaseAuth('token?grant_type=password', { email, password });
-                        saveSession(data);
-                        state.user = data.user;
-                        await loadData();
-                        const onboarded = localStorage.getItem('owomi_onboarded');
-                        state.currentSection = onboarded ? 'app' : 'onboarding';
-                        render();
-                    } else {
-                        await supabaseAuth('signup', { email, password, data: { business_name: name } });
-                        document.getElementById('auth-success').textContent = 'Account created! Check email to confirm.';
-                        document.getElementById('auth-success').classList.remove('hidden');
-                        btn.disabled = false;
-                        btn.textContent = 'Sign Up';
-                    }
-                } catch (err) {
-                    console.error('Auth error:', err);
-                    document.getElementById('auth-error').textContent = err.message || 'Something went wrong. Please try again.';
-                    document.getElementById('auth-error').classList.remove('hidden');
-                    btn.disabled = false;
-                    btn.textContent = isLogin ? 'Login' : 'Sign Up';
-                }
-            };
-            
-            // Backup: Also add click handler to button
-            document.getElementById('auth-btn')?.addEventListener('click', (e) => {
-                // The form onsubmit will handle it, but this ensures the form submits
-                const form = document.getElementById('auth-form');
-                if (form && !form.checkValidity()) {
-                    form.reportValidity();
-                }
             });
         }
 
