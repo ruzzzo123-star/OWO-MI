@@ -3146,73 +3146,101 @@
             document.getElementById('modal-close').onclick = closeModal;
             
             document.querySelectorAll('.upgrade-btn').forEach(btn => {
-                btn.onclick = () => {
+                btn.onclick = async () => {
                     const planName = btn.dataset.plan;
                     const price = parseInt(btn.dataset.price);
-                    initiatePaystackSubscription(planName, price);
+                    console.log('Upgrade clicked:', planName, price);
+                    btn.textContent = 'Processing...';
+                    btn.disabled = true;
+                    try {
+                        await initiatePaystackSubscription(planName, price);
+                    } catch (err) {
+                        console.error('Payment error:', err);
+                        showToast('Payment failed: ' + err.message, 'error');
+                    }
+                    btn.textContent = `Upgrade to ${planName === 'starter' ? 'Starter' : 'Pro'} →`;
+                    btn.disabled = false;
                 };
             });
         }
 
         async function initiatePaystackSubscription(planName, amount) {
+            console.log('Initiating payment:', planName, amount);
+            
             const email = state.user?.email || state.businessProfile?.email;
+            console.log('User email:', email);
+            
             if (!email) {
                 showToast('Please set your email first', 'error');
                 return;
             }
             
-            // Use Paystack inline
-            const handler = PaystackPop.setup({
-                key: OWOMI_PAYSTACK_KEY, // Owo Mi subscription payments
-                email: email,
-                amount: amount * 100, // Kobo
-                currency: 'NGN',
-                ref: 'OWO-' + Date.now(),
-                metadata: {
-                    business_id: state.businessId,
-                    plan: planName,
-                    type: 'subscription'
-                },
-                callback: async function(response) {
-                    console.log('Payment success:', response);
-                    
-                    // Record payment and upgrade plan
-                    const plan = state.plans.find(p => p.name === planName);
-                    if (plan) {
-                        try {
-                            // Record payment
-                            await db.recordPayment({
-                                amount: amount,
-                                status: 'success',
-                                paystack_reference: response.reference,
-                                paystack_transaction_id: response.transaction,
-                                payment_method: 'card',
-                                description: `Upgrade to ${plan.display_name}`
-                            });
-                            
-                            // Update subscription
-                            await db.updateSubscription({
-                                plan_id: plan.id,
-                                status: 'active',
-                                current_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
-                            });
-                            
-                            // Reload data
-                            await db.loadAllData();
-                            closeModal();
-                            showToast(`🎉 Welcome to ${plan.display_name}!`, 'success');
-                            render();
-                        } catch (err) {
-                            console.error('Upgrade error:', err);
-                            showToast('Payment received but upgrade failed. Contact support.', 'error');
+            // Check if Paystack is loaded
+            if (typeof PaystackPop === 'undefined') {
+                showToast('Payment system loading... please try again', 'error');
+                console.error('PaystackPop not loaded');
+                return;
+            }
+            
+            console.log('Opening Paystack popup...');
+            
+            try {
+                // Use Paystack inline
+                const handler = PaystackPop.setup({
+                    key: OWOMI_PAYSTACK_KEY, // Owo Mi subscription payments
+                    email: email,
+                    amount: amount * 100, // Kobo
+                    currency: 'NGN',
+                    ref: 'OWO-' + Date.now(),
+                    metadata: {
+                        business_id: state.businessId,
+                        plan: planName,
+                        type: 'subscription'
+                    },
+                    callback: async function(response) {
+                        console.log('Payment success:', response);
+                        
+                        // Record payment and upgrade plan
+                        const plan = state.plans.find(p => p.name === planName);
+                        if (plan) {
+                            try {
+                                // Record payment
+                                await db.recordPayment({
+                                    amount: amount,
+                                    status: 'success',
+                                    paystack_reference: response.reference,
+                                    paystack_transaction_id: response.transaction,
+                                    payment_method: 'card',
+                                    description: `Upgrade to ${plan.display_name}`
+                                });
+                                
+                                // Update subscription
+                                await db.updateSubscription({
+                                    plan_id: plan.id,
+                                    status: 'active',
+                                    current_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+                                });
+                                
+                                // Reload data
+                                await db.loadAllData();
+                                closeModal();
+                                showToast(`🎉 Welcome to ${plan.display_name}!`, 'success');
+                                render();
+                            } catch (err) {
+                                console.error('Upgrade error:', err);
+                                showToast('Payment received but upgrade failed. Contact support.', 'error');
+                            }
                         }
+                    },
+                    onClose: function() {
+                        console.log('Payment window closed');
                     }
-                },
-                onClose: function() {
-                    console.log('Payment window closed');
-                }
-            });
-            handler.openIframe();
+                });
+                handler.openIframe();
+            } catch (err) {
+                console.error('Paystack error:', err);
+                showToast('Payment failed to initialize: ' + err.message, 'error');
+            }
         }
 
         function formatPlanLimit(value) {
@@ -10567,4 +10595,4 @@
         });
     </script>
 </body>
-    </html>
+</html>
