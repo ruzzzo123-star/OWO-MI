@@ -3197,39 +3197,42 @@
                         plan: planName,
                         type: 'subscription'
                     },
-                    callback: async function(response) {
+                    callback: function(response) {
                         console.log('Payment success:', response);
                         
                         // Record payment and upgrade plan
                         const plan = state.plans.find(p => p.name === planName);
                         if (plan) {
-                            try {
-                                // Record payment
-                                await db.recordPayment({
-                                    amount: amount,
-                                    status: 'success',
-                                    paystack_reference: response.reference,
-                                    paystack_transaction_id: response.transaction,
-                                    payment_method: 'card',
-                                    description: `Upgrade to ${plan.display_name}`
-                                });
-                                
-                                // Update subscription
-                                await db.updateSubscription({
-                                    plan_id: plan.id,
-                                    status: 'active',
-                                    current_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
-                                });
-                                
-                                // Reload data
-                                await db.loadAllData();
-                                closeModal();
-                                showToast(`🎉 Welcome to ${plan.display_name}!`, 'success');
-                                render();
-                            } catch (err) {
-                                console.error('Upgrade error:', err);
-                                showToast('Payment received but upgrade failed. Contact support.', 'error');
-                            }
+                            // Handle async operations
+                            (async () => {
+                                try {
+                                    // Record payment
+                                    await db.recordPayment({
+                                        amount: amount,
+                                        status: 'success',
+                                        paystack_reference: response.reference,
+                                        paystack_transaction_id: response.transaction,
+                                        payment_method: 'card',
+                                        description: `Upgrade to ${plan.display_name}`
+                                    });
+                                    
+                                    // Update subscription
+                                    await db.updateSubscription({
+                                        plan_id: plan.id,
+                                        status: 'active',
+                                        current_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+                                    });
+                                    
+                                    // Reload data
+                                    await db.loadAllData();
+                                    closeModal();
+                                    showToast(`🎉 Welcome to ${plan.display_name}!`, 'success');
+                                    render();
+                                } catch (err) {
+                                    console.error('Upgrade error:', err);
+                                    showToast('Payment received but upgrade failed. Contact support.', 'error');
+                                }
+                            })();
                         }
                     },
                     onClose: function() {
