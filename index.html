@@ -2,15 +2,35 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Owo Mi</title>
 
     <!-- PWA Meta Tags -->
     <meta name="description" content="Smart Invoice Manager for Nigerian Businesses">
     <meta name="theme-color" content="#3b82f6">
+    <meta name="mobile-web-app-capable" content="yes">
+    
+    <!-- iOS Specific -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Owo Mi">
+    <meta name="format-detection" content="telephone=no">
+    
+    <!-- iOS Splash Screens -->
+    <!-- iPhone 14 Pro Max, 15 Plus -->
+    <link rel="apple-touch-startup-image" media="screen and (device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3)" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 430 932'><rect fill='%233b82f6' width='430' height='932'/><text x='215' y='466' text-anchor='middle' font-size='120'>💰</text></svg>">
+    <!-- iPhone 14 Pro, 15 -->
+    <link rel="apple-touch-startup-image" media="screen and (device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3)" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 393 852'><rect fill='%233b82f6' width='393' height='852'/><text x='196' y='426' text-anchor='middle' font-size='100'>💰</text></svg>">
+    <!-- iPhone 12/13/14, 15 -->
+    <link rel="apple-touch-startup-image" media="screen and (device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3)" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 390 844'><rect fill='%233b82f6' width='390' height='844'/><text x='195' y='422' text-anchor='middle' font-size='100'>💰</text></svg>">
+    <!-- iPhone 11/XR -->
+    <link rel="apple-touch-startup-image" media="screen and (device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2)" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 414 896'><rect fill='%233b82f6' width='414' height='896'/><text x='207' y='448' text-anchor='middle' font-size='100'>💰</text></svg>">
+    <!-- iPhone X/XS/11 Pro -->
+    <link rel="apple-touch-startup-image" media="screen and (device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3)" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 375 812'><rect fill='%233b82f6' width='375' height='812'/><text x='187' y='406' text-anchor='middle' font-size='100'>💰</text></svg>">
+    <!-- iPhone 8/7/6s Plus -->
+    <link rel="apple-touch-startup-image" media="screen and (device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3)" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 414 736'><rect fill='%233b82f6' width='414' height='736'/><text x='207' y='368' text-anchor='middle' font-size='100'>💰</text></svg>">
+    <!-- iPhone SE/8/7/6s -->
+    <link rel="apple-touch-startup-image" media="screen and (device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 375 667'><rect fill='%233b82f6' width='375' height='667'/><text x='187' y='333' text-anchor='middle' font-size='100'>💰</text></svg>">
 
     <!-- PWA Manifest -->
     <link rel="manifest" href="data:application/json,{
@@ -38,11 +58,39 @@
 
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        html {
+            /* Prevent pull-to-refresh on iOS */
+            overscroll-behavior-y: contain;
+        }
+        
         body { 
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
             background: #f5f5f5; 
             min-height: 100vh;
             overflow-x: hidden;
+            /* Prevent pull-to-refresh */
+            overscroll-behavior-y: contain;
+            /* Better touch handling */
+            touch-action: manipulation;
+            -webkit-user-select: none;
+            user-select: none;
+            /* Safe area for notch devices */
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
+            padding-left: env(safe-area-inset-left);
+            padding-right: env(safe-area-inset-right);
+        }
+        
+        /* Allow text selection in inputs and textareas */
+        input, textarea, [contenteditable] {
+            -webkit-user-select: text;
+            user-select: text;
+        }
+        
+        /* Smooth scrolling on iOS */
+        .scroll-container {
+            -webkit-overflow-scrolling: touch;
         }
         
         /* Install Prompt */
@@ -1375,8 +1423,11 @@
             cursor: pointer; 
             width: 100%;
             transition: all 0.2s ease;
+            /* iOS touch improvements */
+            touch-action: manipulation;
+            -webkit-appearance: none;
         }
-        .btn:active { transform: scale(0.98); }
+        .btn:active { transform: scale(0.98); opacity: 0.9; }
         .btn-primary { 
             background: linear-gradient(135deg, #3b82f6, #2563eb); 
             color: white;
@@ -1437,6 +1488,27 @@
         body.dark .email-form .form-input { background: #252538; border-color: #3a3a4e; color: #fff; }
         body.dark .email-form .form-label { color: #ccc; }
         body.dark .auth-toggle { color: #888; }
+        
+        /* iOS PWA Specific Styles */
+        body.ios-pwa {
+            /* Extra padding for status bar in standalone mode */
+            padding-top: max(env(safe-area-inset-top), 20px);
+        }
+        body.ios-pwa .header {
+            /* Account for iOS status bar */
+            padding-top: 8px;
+        }
+        body.standalone {
+            /* Smooth iOS-like scrolling */
+            scroll-behavior: smooth;
+        }
+        /* Prevent iOS rubber-banding on fixed elements */
+        body.ios-pwa .nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+        }
         body.dark .auth-back { color: #666; }
         body.dark .auth-title, body.dark .tab { color: #eee; }
         body.dark .tabs { background: #0f0f1a; }
@@ -10407,8 +10479,21 @@
 
         // ========== INIT ==========
         const DEV_MODE = true; // Set to false when done testing
+        
+        // iOS Standalone Mode Detection
+        const isIOSPWA = window.navigator.standalone === true;
+        const isAndroidPWA = window.matchMedia('(display-mode: standalone)').matches;
+        const isPWA = isIOSPWA || isAndroidPWA;
 
         async function init() {
+            // Add iOS PWA class for specific styling
+            if (isIOSPWA) {
+                document.body.classList.add('ios-pwa');
+            }
+            if (isPWA) {
+                document.body.classList.add('standalone');
+            }
+            
             if (localStorage.getItem('owomi_dark') === '1') document.body.classList.add('dark');
             
             // Check for customer portal mode via URL hash
