@@ -2442,6 +2442,9 @@
         // ========== CONFIG ==========
         const SUPABASE_URL = 'https://djqmtzqnwklwnvlqlejj.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRqcW10enFud2tsd252bHFsZWpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQwNzk4OTMsImV4cCI6MjA3OTY1NTg5M30.7zCs844TQdocVDeB7fXc1uIziiGxoiGNLYFyxXf7ZJ8';
+        
+        // Paystack key for Owo Mi subscription payments (change to pk_live_... for production)
+        const OWOMI_PAYSTACK_KEY = 'pk_test_23e4f1eee82d5e72d9ea42fe615e7c10da8c6bb7';
 
         // ========== STATE ==========
         let state = {
@@ -3160,7 +3163,7 @@
             
             // Use Paystack inline
             const handler = PaystackPop.setup({
-                key: state.businessProfile?.paystackPublicKey || 'pk_test_xxxxx', // Will need real key
+                key: OWOMI_PAYSTACK_KEY, // Owo Mi subscription payments
                 email: email,
                 amount: amount * 100, // Kobo
                 currency: 'NGN',
