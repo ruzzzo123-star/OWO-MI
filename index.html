@@ -2476,14 +2476,21 @@
                     'Authorization': `Bearer ${session?.access_token || SUPABASE_KEY}`
                 };
                 
+                console.log('DB fetch:', endpoint);
                 const response = await fetch(`${SUPABASE_URL}/rest/v1/${endpoint}`, {
                     ...options,
                     headers: { ...headers, ...options.headers }
                 });
                 
                 if (!response.ok) {
-                    const error = await response.json();
-                    throw new Error(error.message || 'Database error');
+                    const errorText = await response.text();
+                    console.error('DB error:', response.status, errorText);
+                    try {
+                        const error = JSON.parse(errorText);
+                        throw new Error(error.message || error.error || 'Database error');
+                    } catch (e) {
+                        throw new Error(errorText || 'Database error');
+                    }
                 }
                 
                 const text = await response.text();
@@ -2496,9 +2503,41 @@
                 return data?.[0] || null;
             },
 
+            // Create business (for new users if trigger didn't work)
+            async createBusiness() {
+                const session = getSession();
+                if (!session?.user?.id) return null;
+                
+                const data = await this.fetch('businesses', {
+                    method: 'POST',
+                    headers: { 'Prefer': 'return=representation' },
+                    body: JSON.stringify({ 
+                        user_id: session.user.id,
+                        email: session.user.email || '',
+                        name: ''
+                    })
+                });
+                const business = data?.[0];
+                if (business) {
+                    state.businessId = business.id;
+                }
+                return business;
+            },
+
             // Update business profile
             async updateBusiness(updates) {
-                if (!state.businessId) return null;
+                // If no businessId, try to create one first
+                if (!state.businessId) {
+                    const business = await this.getBusiness();
+                    if (business) {
+                        state.businessId = business.id;
+                    } else {
+                        // Create new business
+                        const newBusiness = await this.createBusiness();
+                        if (!newBusiness) return null;
+                    }
+                }
+                
                 await this.fetch(`businesses?id=eq.${state.businessId}`, {
                     method: 'PATCH',
                     body: JSON.stringify(updates)
@@ -2696,17 +2735,20 @@
             // ===== LOAD ALL DATA =====
             async loadAllData() {
                 try {
+                    console.log('Loading all data...');
                     const [business, customers, invoices, quotes, products, expenses, payments, recurring, reminderSettings] = await Promise.all([
-                        this.getBusiness(),
-                        this.getCustomers(),
-                        this.getInvoices(),
-                        this.getQuotes(),
-                        this.getProducts(),
-                        this.getExpenses(),
-                        this.getPayments(),
-                        this.getRecurringTemplates(),
-                        this.getReminderSettings()
+                        this.getBusiness().catch(e => { console.error('getBusiness error:', e); return null; }),
+                        this.getCustomers().catch(e => { console.error('getCustomers error:', e); return []; }),
+                        this.getInvoices().catch(e => { console.error('getInvoices error:', e); return []; }),
+                        this.getQuotes().catch(e => { console.error('getQuotes error:', e); return []; }),
+                        this.getProducts().catch(e => { console.error('getProducts error:', e); return []; }),
+                        this.getExpenses().catch(e => { console.error('getExpenses error:', e); return []; }),
+                        this.getPayments().catch(e => { console.error('getPayments error:', e); return []; }),
+                        this.getRecurringTemplates().catch(e => { console.error('getRecurring error:', e); return []; }),
+                        this.getReminderSettings().catch(e => { console.error('getReminderSettings error:', e); return null; })
                     ]);
+                    
+                    console.log('Data loaded:', { business, customers: customers?.length, invoices: invoices?.length });
 
                     if (business) {
                         state.businessId = business.id;
@@ -2736,6 +2778,11 @@
                         } else {
                             state.currentSection = 'app';
                         }
+                    } else {
+                        // No business record - new user, go to onboarding
+                        console.log('No business record found, going to onboarding');
+                        state.currentSection = 'onboarding';
+                        state.businessProfile = {};
                     }
 
                     // Map database fields to app format
@@ -2998,13 +3045,16 @@
         }
 
         async function supabaseAuth(endpoint, body) {
+            console.log('Auth request:', endpoint, body);
             const res = await fetch(`${SUPABASE_URL}/auth/v1/${endpoint}`, {
                 method: 'POST',
                 headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
                 body: JSON.stringify(body)
             });
             const data = await res.json();
-            if (data.error) throw new Error(data.error.message || data.msg || 'Auth error');
+            console.log('Auth response:', res.status, data);
+            if (data.error) throw new Error(data.error.message || data.error_description || data.msg || 'Auth error');
+            if (!res.ok) throw new Error(data.message || data.msg || 'Auth failed');
             return data;
         }
 
@@ -5538,30 +5588,38 @@
 
                 try {
                     if (isSignup) {
-                        // Sign up
+                        // Sign up - correct body format for Supabase REST API
                         const data = await supabaseAuth('signup', { 
                             email, 
                             password,
-                            options: {
-                                data: { business_name: name }
-                            }
+                            data: { business_name: name }
                         });
                         
-                        if (data.user && !data.user.confirmed_at) {
+                        console.log('Signup response:', data);
+                        
+                        if (data.user && !data.user.email_confirmed_at && !data.access_token) {
+                            // Email confirmation required
                             showAuthSuccess('Account created! Check your email to confirm.');
                             btn.disabled = false;
                             btn.textContent = 'Create Account';
-                        } else if (data.access_token) {
+                        } else if (data.access_token || data.session?.access_token) {
                             // Auto-confirmed (email confirmation disabled)
-                            saveSession(data);
+                            const session = data.session || data;
+                            saveSession(session);
                             state.user = data.user;
                             await db.loadAllData();
                             state.currentSection = 'onboarding';
                             render();
+                        } else if (data.user) {
+                            // User created but needs confirmation
+                            showAuthSuccess('Account created! Check your email to confirm.');
+                            btn.disabled = false;
+                            btn.textContent = 'Create Account';
                         }
                     } else {
                         // Login
                         const data = await supabaseAuth('token?grant_type=password', { email, password });
+                        console.log('Login response:', data);
                         saveSession(data);
                         state.user = data.user;
                         await db.loadAllData();
@@ -5576,13 +5634,19 @@
                         errorMsg = 'Invalid email or password';
                     } else if (errorMsg.includes('Email not confirmed')) {
                         errorMsg = 'Please check your email and confirm your account';
-                    } else if (errorMsg.includes('already registered')) {
+                    } else if (errorMsg.includes('already registered') || errorMsg.includes('already been registered')) {
                         errorMsg = 'This email is already registered. Try signing in instead.';
+                    } else if (errorMsg.includes('Password should be')) {
+                        errorMsg = 'Password must be at least 6 characters';
                     }
                     
                     showAuthError(errorMsg);
-                    btn.disabled = false;
-                    btn.textContent = isSignup ? 'Create Account' : 'Sign In';
+                } finally {
+                    // Always re-enable button
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.textContent = isSignup ? 'Create Account' : 'Sign In';
+                    }
                 }
             };
         }
