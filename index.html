@@ -888,13 +888,15 @@
             line-height: 1.5;
         }
         .success-msg { 
-            background: #dcfce7; 
+            background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
             color: #166534; 
-            padding: 16px; 
-            border-radius: 12px; 
-            margin-bottom: 16px; 
+            padding: 24px; 
+            border-radius: 16px; 
+            margin-bottom: 20px; 
             font-size: 14px;
             line-height: 1.6;
+            border: 2px solid #86efac;
+            box-shadow: 0 4px 12px rgba(34, 197, 94, 0.2);
         }
         .success-msg strong {
             color: #15803d;
@@ -5588,6 +5590,8 @@
                 btn.disabled = true;
                 btn.textContent = 'Please wait...';
                 hideAuthMessages();
+                
+                let signupSuccess = false; // Track if we showed success
 
                 try {
                     if (isSignup) {
@@ -5598,11 +5602,17 @@
                             data: { business_name: name }
                         });
                         
-                        console.log('Signup response:', data);
+                        console.log('Signup response:', JSON.stringify(data, null, 2));
                         
+                        // Check if user was created
                         if (data.user) {
                             // Check if auto-confirmed or needs email confirmation
-                            if (data.access_token || data.session?.access_token) {
+                            const hasSession = data.access_token || data.session?.access_token;
+                            const isConfirmed = data.user.email_confirmed_at || data.user.confirmed_at;
+                            
+                            console.log('Has session:', hasSession, 'Is confirmed:', isConfirmed);
+                            
+                            if (hasSession) {
                                 // Auto-confirmed (email confirmation disabled)
                                 const session = data.session || data;
                                 saveSession(session);
@@ -5611,24 +5621,35 @@
                                 showToast('Account created successfully! 🎉', 'success');
                                 state.currentSection = 'onboarding';
                                 render();
+                                return; // Exit early
                             } else {
                                 // Email confirmation required - show success with instructions
+                                signupSuccess = true;
                                 showAuthSuccess(`
-                                    <div style="text-align:left;">
-                                        <strong>✅ Account created successfully!</strong><br><br>
-                                        We've sent a confirmation email to:<br>
-                                        <strong>${email}</strong><br><br>
-                                        Please check your inbox and click the confirmation link, then come back here to sign in.
+                                    <div style="text-align:center;">
+                                        <div style="font-size: 48px; margin-bottom: 16px;">📧</div>
+                                        <strong style="font-size: 18px;">Account Created!</strong><br><br>
+                                        <span style="color: #166534;">We've sent a confirmation email to:</span><br>
+                                        <strong style="font-size: 16px; color: #15803d;">${email}</strong><br><br>
+                                        <span style="color: #166534;">Please check your inbox (and spam folder) and click the confirmation link.</span><br><br>
+                                        <span style="color: #15803d; font-weight: 500;">Then come back and click "Sign In" below.</span>
                                     </div>
                                 `);
-                                btn.textContent = 'Create Account';
+                                // Change button to indicate next step
+                                btn.textContent = '✓ Email Sent - Check Inbox';
+                                btn.disabled = true;
+                                btn.style.background = '#22c55e';
                                 
-                                // Switch to login mode after a delay
+                                // After 5 seconds, switch to login mode
                                 setTimeout(() => {
                                     state.authMode = 'login';
-                                    // Don't re-render, just update the toggle text
-                                }, 3000);
+                                    render();
+                                }, 5000);
+                                return; // Exit early
                             }
+                        } else {
+                            // No user in response - something went wrong
+                            showAuthError('Signup failed. Please try again.');
                         }
                     } else {
                         // Login
@@ -5639,6 +5660,7 @@
                         await db.loadAllData();
                         showToast('Welcome back! 👋', 'success');
                         render();
+                        return; // Exit early
                     }
                 } catch (err) {
                     console.error('Auth error:', err);
@@ -5648,7 +5670,7 @@
                     if (errorMsg.includes('Invalid login')) {
                         errorMsg = 'Invalid email or password';
                     } else if (errorMsg.includes('Email not confirmed')) {
-                        errorMsg = 'Please check your email and confirm your account';
+                        errorMsg = 'Please check your email and confirm your account first';
                     } else if (errorMsg.includes('already registered') || errorMsg.includes('already been registered')) {
                         errorMsg = 'This email is already registered. Try signing in instead.';
                     } else if (errorMsg.includes('Password should be')) {
@@ -5656,12 +5678,13 @@
                     }
                     
                     showAuthError(errorMsg);
-                } finally {
-                    // Always re-enable button
-                    if (btn) {
-                        btn.disabled = false;
-                        btn.textContent = isSignup ? 'Create Account' : 'Sign In';
-                    }
+                }
+                
+                // Re-enable button only if we didn't show success
+                if (!signupSuccess && btn) {
+                    btn.disabled = false;
+                    btn.textContent = isSignup ? 'Create Account' : 'Sign In';
+                    btn.style.background = '';
                 }
             };
         }
