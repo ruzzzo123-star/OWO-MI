@@ -885,20 +885,19 @@
             border-radius: 12px; 
             margin-bottom: 16px; 
             font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            line-height: 1.5;
         }
         .success-msg { 
             background: #dcfce7; 
             color: #166534; 
-            padding: 14px 16px; 
+            padding: 16px; 
             border-radius: 12px; 
             margin-bottom: 16px; 
             font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            line-height: 1.6;
+        }
+        .success-msg strong {
+            color: #15803d;
         }
         
         .tabs { display: flex; background: #f0f0f0; border-radius: 12px; padding: 4px; margin-bottom: 24px; }
@@ -3866,6 +3865,12 @@
                                 <label class="form-label">Password</label>
                                 <input type="password" class="form-input" id="auth-password" placeholder="••••••••" required minlength="6">
                             </div>
+                            ${isSignup ? `
+                                <div class="form-group">
+                                    <label class="form-label">Confirm Password</label>
+                                    <input type="password" class="form-input" id="auth-password-confirm" placeholder="••••••••" required minlength="6">
+                                </div>
+                            ` : ''}
                             <button type="submit" class="auth-submit-btn" id="auth-btn">
                                 ${isSignup ? 'Create Account' : 'Sign In'}
                             </button>
@@ -5515,6 +5520,34 @@
                 render();
             });
 
+            // Real-time password match validation for signup
+            if (isSignup) {
+                const passwordInput = document.getElementById('auth-password');
+                const confirmInput = document.getElementById('auth-password-confirm');
+                
+                const checkPasswordMatch = () => {
+                    if (!confirmInput || !passwordInput) return;
+                    const password = passwordInput.value;
+                    const confirm = confirmInput.value;
+                    
+                    if (confirm.length > 0) {
+                        if (password === confirm) {
+                            confirmInput.style.borderColor = '#22c55e';
+                            confirmInput.style.backgroundColor = '#f0fdf4';
+                        } else {
+                            confirmInput.style.borderColor = '#ef4444';
+                            confirmInput.style.backgroundColor = '#fef2f2';
+                        }
+                    } else {
+                        confirmInput.style.borderColor = '#e0e0e0';
+                        confirmInput.style.backgroundColor = '';
+                    }
+                };
+                
+                passwordInput?.addEventListener('input', checkPasswordMatch);
+                confirmInput?.addEventListener('input', checkPasswordMatch);
+            }
+
             // Email/Password Form
             const authForm = document.getElementById('auth-form');
             if (!authForm) return;
@@ -5525,17 +5558,31 @@
                 const btn = document.getElementById('auth-btn');
                 const emailInput = document.getElementById('auth-email');
                 const passwordInput = document.getElementById('auth-password');
+                const passwordConfirmInput = document.getElementById('auth-password-confirm');
                 const nameInput = document.getElementById('auth-name');
                 
                 if (!btn || !emailInput || !passwordInput) return;
                 
                 const email = emailInput.value.trim();
                 const password = passwordInput.value;
+                const passwordConfirm = passwordConfirmInput?.value || '';
                 const name = nameInput?.value?.trim() || '';
 
+                // Validation
                 if (!email || !password) {
                     showAuthError('Please enter email and password');
                     return;
+                }
+                
+                if (isSignup) {
+                    if (password.length < 6) {
+                        showAuthError('Password must be at least 6 characters');
+                        return;
+                    }
+                    if (password !== passwordConfirm) {
+                        showAuthError('Passwords do not match');
+                        return;
+                    }
                 }
 
                 btn.disabled = true;
@@ -5553,24 +5600,35 @@
                         
                         console.log('Signup response:', data);
                         
-                        if (data.user && !data.user.email_confirmed_at && !data.access_token) {
-                            // Email confirmation required
-                            showAuthSuccess('Account created! Check your email to confirm.');
-                            btn.disabled = false;
-                            btn.textContent = 'Create Account';
-                        } else if (data.access_token || data.session?.access_token) {
-                            // Auto-confirmed (email confirmation disabled)
-                            const session = data.session || data;
-                            saveSession(session);
-                            state.user = data.user;
-                            await db.loadAllData();
-                            state.currentSection = 'onboarding';
-                            render();
-                        } else if (data.user) {
-                            // User created but needs confirmation
-                            showAuthSuccess('Account created! Check your email to confirm.');
-                            btn.disabled = false;
-                            btn.textContent = 'Create Account';
+                        if (data.user) {
+                            // Check if auto-confirmed or needs email confirmation
+                            if (data.access_token || data.session?.access_token) {
+                                // Auto-confirmed (email confirmation disabled)
+                                const session = data.session || data;
+                                saveSession(session);
+                                state.user = data.user;
+                                await db.loadAllData();
+                                showToast('Account created successfully! 🎉', 'success');
+                                state.currentSection = 'onboarding';
+                                render();
+                            } else {
+                                // Email confirmation required - show success with instructions
+                                showAuthSuccess(`
+                                    <div style="text-align:left;">
+                                        <strong>✅ Account created successfully!</strong><br><br>
+                                        We've sent a confirmation email to:<br>
+                                        <strong>${email}</strong><br><br>
+                                        Please check your inbox and click the confirmation link, then come back here to sign in.
+                                    </div>
+                                `);
+                                btn.textContent = 'Create Account';
+                                
+                                // Switch to login mode after a delay
+                                setTimeout(() => {
+                                    state.authMode = 'login';
+                                    // Don't re-render, just update the toggle text
+                                }, 3000);
+                            }
                         }
                     } else {
                         // Login
@@ -5579,6 +5637,7 @@
                         saveSession(data);
                         state.user = data.user;
                         await db.loadAllData();
+                        showToast('Welcome back! 👋', 'success');
                         render();
                     }
                 } catch (err) {
@@ -5613,14 +5672,23 @@
             if (el) {
                 el.innerHTML = `⚠️ ${message}`;
                 el.classList.remove('hidden');
+                // Scroll to show error
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
         }
 
         function showAuthSuccess(message) {
             const el = document.getElementById('auth-success');
             if (el) {
-                el.innerHTML = `✅ ${message}`;
+                // Check if message is HTML or plain text
+                if (message.includes('<')) {
+                    el.innerHTML = message;
+                } else {
+                    el.innerHTML = `✅ ${message}`;
+                }
                 el.classList.remove('hidden');
+                // Scroll to show success
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
         }
 
