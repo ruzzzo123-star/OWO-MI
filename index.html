@@ -1035,6 +1035,123 @@
         .stat-value { font-size: 24px; font-weight: 800; color: #1a1a2e; }
         .stat-value.green { color: #16a34a; }
         .stat-value.red { color: #dc2626; }
+        .stat-change { font-size: 11px; font-weight: 600; margin-top: 4px; display: flex; align-items: center; gap: 3px; }
+        .stat-change.up { color: #16a34a; }
+        .stat-change.down { color: #dc2626; }
+        .stat-change.neutral { color: #888; }
+        
+        /* Period Filter */
+        .period-filter { 
+            display: flex; 
+            gap: 8px; 
+            margin-bottom: 16px; 
+            background: white;
+            padding: 6px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        .period-btn {
+            flex: 1;
+            padding: 10px 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            background: transparent;
+            color: #666;
+            transition: all 0.2s ease;
+        }
+        .period-btn.active {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+        }
+        .period-btn:not(.active):hover {
+            background: #f5f5f5;
+        }
+        
+        /* Profit Card */
+        .profit-card {
+            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+            border: 1px solid #bbf7d0;
+            padding: 18px;
+            border-radius: 16px;
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .profit-card.negative {
+            background: linear-gradient(135deg, #fef2f2, #fee2e2);
+            border-color: #fecaca;
+        }
+        .profit-label { font-size: 13px; color: #666; font-weight: 500; }
+        .profit-value { font-size: 28px; font-weight: 800; color: #16a34a; }
+        .profit-card.negative .profit-value { color: #dc2626; }
+        .profit-breakdown { text-align: right; }
+        .profit-row { font-size: 12px; color: #666; margin-bottom: 2px; }
+        .profit-row span { font-weight: 600; }
+        
+        /* Collection Rate Progress */
+        .collection-rate {
+            background: white;
+            padding: 16px;
+            border-radius: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        }
+        .collection-rate-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .collection-rate-label { font-size: 13px; color: #666; font-weight: 500; }
+        .collection-rate-value { font-size: 18px; font-weight: 800; color: #3b82f6; }
+        .collection-rate-bar {
+            height: 10px;
+            background: #e5e7eb;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        .collection-rate-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6, #16a34a);
+            border-radius: 5px;
+            transition: width 0.5s ease;
+        }
+        .collection-rate-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 6px;
+            font-size: 11px;
+            color: #999;
+        }
+        
+        /* Mini Comparison Chart */
+        .comparison-chart {
+            background: white;
+            padding: 16px;
+            border-radius: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        }
+        .comparison-title { font-size: 14px; font-weight: 700; margin-bottom: 12px; color: #333; }
+        .comparison-bars { display: flex; gap: 16px; }
+        .comparison-bar-group { flex: 1; }
+        .comparison-bar-label { font-size: 11px; color: #888; margin-bottom: 6px; text-align: center; }
+        .comparison-bar-container { height: 60px; background: #f5f5f5; border-radius: 8px; position: relative; overflow: hidden; }
+        .comparison-bar-fill { position: absolute; bottom: 0; left: 0; right: 0; border-radius: 6px; transition: height 0.5s ease; }
+        .comparison-bar-fill.revenue { background: linear-gradient(to top, #3b82f6, #60a5fa); }
+        .comparison-bar-fill.expenses { background: linear-gradient(to top, #f87171, #fca5a5); }
+        .comparison-bar-fill.profit { background: linear-gradient(to top, #16a34a, #4ade80); }
+        .comparison-bar-fill.profit.negative { background: linear-gradient(to top, #dc2626, #f87171); }
+        .comparison-bar-value { text-align: center; font-size: 12px; font-weight: 700; margin-top: 6px; }
+        .comparison-bar-value.revenue { color: #3b82f6; }
+        .comparison-bar-value.expenses { color: #ef4444; }
+        .comparison-bar-value.profit { color: #16a34a; }
+        .comparison-bar-value.profit.negative { color: #dc2626; }
         
         /* Quick Actions */
         .quick-actions { display: flex; gap: 12px; margin-bottom: 24px; }
@@ -1449,6 +1566,50 @@
         }
         .empty-icon { font-size: 56px; margin-bottom: 16px; filter: grayscale(0.3); }
         
+        /* Entrance Animations */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes scaleIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        .animate-fade-in { animation: fadeIn 0.3s ease-out; }
+        .animate-fade-up { animation: fadeInUp 0.4s ease-out; }
+        .animate-scale-in { animation: scaleIn 0.3s ease-out; }
+        
+        /* Staggered animations for dashboard */
+        .period-filter { animation: fadeInUp 0.3s ease-out; }
+        .profit-card { animation: fadeInUp 0.35s ease-out; }
+        .collection-rate { animation: fadeInUp 0.4s ease-out; }
+        .stats .stat:nth-child(1) { animation: fadeInUp 0.3s ease-out 0.05s both; }
+        .stats .stat:nth-child(2) { animation: fadeInUp 0.3s ease-out 0.1s both; }
+        .stats .stat:nth-child(3) { animation: fadeInUp 0.3s ease-out 0.15s both; }
+        .stats .stat:nth-child(4) { animation: fadeInUp 0.3s ease-out 0.2s both; }
+        .comparison-chart { animation: fadeInUp 0.45s ease-out; }
+        .chart-container { animation: fadeInUp 0.5s ease-out; }
+        .ai-insights { animation: slideInRight 0.4s ease-out; }
+        
+        /* Pulse animation for important numbers */
+        @keyframes pulse-green {
+            0%, 100% { color: #16a34a; }
+            50% { color: #22c55e; }
+        }
+        @keyframes pulse-red {
+            0%, 100% { color: #dc2626; }
+            50% { color: #ef4444; }
+        }
+        .profit-value { transition: color 0.3s ease; }
+        
         .loading { 
             display: flex; 
             align-items: center; 
@@ -1488,6 +1649,21 @@
         body.dark .email-form .form-input { background: #252538; border-color: #3a3a4e; color: #fff; }
         body.dark .email-form .form-label { color: #ccc; }
         body.dark .auth-toggle { color: #888; }
+        /* Dark mode for new dashboard components */
+        body.dark .period-filter { background: #1a1a2e; }
+        body.dark .period-btn { color: #888; }
+        body.dark .period-btn:not(.active):hover { background: #252538; }
+        body.dark .profit-card { background: linear-gradient(135deg, #1a2e1a, #1a3a1a); border-color: #2a4a2a; }
+        body.dark .profit-card.negative { background: linear-gradient(135deg, #2e1a1a, #3a1a1a); border-color: #4a2a2a; }
+        body.dark .profit-label, body.dark .profit-row { color: #aaa; }
+        body.dark .collection-rate { background: #1a1a2e; }
+        body.dark .collection-rate-label { color: #aaa; }
+        body.dark .collection-rate-bar { background: #333; }
+        body.dark .collection-rate-labels { color: #666; }
+        body.dark .comparison-chart { background: #1a1a2e; }
+        body.dark .comparison-title { color: #eee; }
+        body.dark .comparison-bar-label { color: #888; }
+        body.dark .comparison-bar-container { background: #252538; }
         
         /* iOS PWA Specific Styles */
         body.ios-pwa {
@@ -2541,6 +2717,8 @@
             currentSection: 'landing',
             authMode: 'login',
             onboardingStep: 1,
+            // Dashboard period filter
+            dashboardPeriod: 'month', // 'month', 'lastMonth', 'all'
             // Subscription
             subscription: null,
             plans: []
@@ -2919,10 +3097,6 @@
                     
                     console.log('Data loaded:', { business, customers: customers?.length, invoices: invoices?.length, subscription });
 
-                    // Load localStorage items (logo, QR, template - not synced to database)
-                    const localBusiness = JSON.parse(localStorage.getItem('owomi_business') || '{}');
-                    const localTemplate = JSON.parse(localStorage.getItem('owomi_template') || '{}');
-
                     if (business) {
                         state.businessId = business.id;
                         state.businessProfile = {
@@ -2934,18 +3108,16 @@
                             bankName: business.bank_name || '',
                             accountNumber: business.account_number || '',
                             accountName: business.account_name || '',
-                            // Logo and QR from localStorage (not database)
-                            logo: localBusiness.logo || '',
-                            paymentQR: localBusiness.paymentQR || '',
+                            logo: business.logo_url || '',
+                            qrCode: business.qr_code_url || '',
                             footerNote: business.footer_note || '',
                             termsAndConditions: business.terms_and_conditions || '',
                             paystackEnabled: business.paystack_enabled || false,
                             paystackPublicKey: business.paystack_public_key || ''
                         };
-                        // Template from localStorage (cosmetic settings)
                         state.invoiceTemplate = {
-                            color: localTemplate.color || '#3b82f6',
-                            style: localTemplate.style || 'modern'
+                            color: business.invoice_color || '#3b82f6',
+                            style: business.invoice_style || 'modern'
                         };
                         
                         // Check if onboarded
@@ -3627,14 +3799,11 @@
         }
 
         // ========== HELPERS ==========
-        const formatNaira = (amt) => '₦' + Number(amt || 0).toLocaleString();
-        const formatDate = (d) => d ? new Date(d).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+        const formatNaira = (amt) => '₦' + Number(amt).toLocaleString();
+        const formatDate = (d) => new Date(d).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' });
         const getStatus = (inv) => {
-            if (!inv) return 'pending';
-            const paid = Number(inv.amount_paid) || 0;
-            const total = Number(inv.amount) || 0;
-            if (paid >= total && total > 0) return 'paid';
-            if (inv.due_date && new Date(inv.due_date) < new Date()) return 'overdue';
+            if (inv.amount_paid >= inv.amount) return 'paid';
+            if (new Date(inv.due_date) < new Date()) return 'overdue';
             return 'pending';
         };
         
@@ -4396,16 +4565,56 @@
             const overdue = state.invoices.filter(i => getStatus(i) === 'overdue');
             const overdueAmt = overdue.reduce((s, i) => s + (i.amount - i.amount_paid), 0);
             const aiInsights = generateAIInsights();
+            
+            // Period-based calculations
+            const periodStats = calculatePeriodStats();
+            const { revenue, expenses, profit, collectionRate, invoiceCount, paidCount, lastPeriod } = periodStats;
 
             return `
+                <!-- Period Filter -->
+                <div class="period-filter">
+                    <button class="period-btn ${state.dashboardPeriod === 'month' ? 'active' : ''}" data-period="month">This Month</button>
+                    <button class="period-btn ${state.dashboardPeriod === 'lastMonth' ? 'active' : ''}" data-period="lastMonth">Last Month</button>
+                    <button class="period-btn ${state.dashboardPeriod === 'all' ? 'active' : ''}" data-period="all">All Time</button>
+                </div>
+                
+                <!-- Net Profit Card -->
+                <div class="profit-card ${profit < 0 ? 'negative' : ''}">
+                    <div>
+                        <div class="profit-label">💰 Net Profit ${state.dashboardPeriod === 'month' ? '(This Month)' : state.dashboardPeriod === 'lastMonth' ? '(Last Month)' : '(All Time)'}</div>
+                        <div class="profit-value">${formatNaira(profit)}</div>
+                    </div>
+                    <div class="profit-breakdown">
+                        <div class="profit-row">Revenue: <span style="color:#16a34a">${formatNaira(revenue)}</span></div>
+                        <div class="profit-row">Expenses: <span style="color:#dc2626">${formatNaira(expenses)}</span></div>
+                    </div>
+                </div>
+                
+                <!-- Collection Rate Progress -->
+                <div class="collection-rate">
+                    <div class="collection-rate-header">
+                        <div class="collection-rate-label">📊 Collection Rate</div>
+                        <div class="collection-rate-value">${collectionRate.toFixed(0)}%</div>
+                    </div>
+                    <div class="collection-rate-bar">
+                        <div class="collection-rate-fill" style="width: ${Math.min(collectionRate, 100)}%"></div>
+                    </div>
+                    <div class="collection-rate-labels">
+                        <span>${paidCount} paid</span>
+                        <span>${invoiceCount - paidCount} pending</span>
+                    </div>
+                </div>
+
                 <div class="stats">
                     <div class="stat">
                         <div class="stat-label">Outstanding</div>
                         <div class="stat-value">${formatNaira(outstanding)}</div>
+                        ${lastPeriod ? renderChangeIndicator(outstanding, lastPeriod.outstanding, true) : ''}
                     </div>
                     <div class="stat">
                         <div class="stat-label">Collected</div>
                         <div class="stat-value green">${formatNaira(collected)}</div>
+                        ${lastPeriod ? renderChangeIndicator(collected, lastPeriod.collected) : ''}
                     </div>
                     <div class="stat">
                         <div class="stat-label">Overdue</div>
@@ -4436,6 +4645,9 @@
                         `).join('')}
                     </div>
                 ` : ''}
+                
+                <!-- Revenue vs Expenses Comparison -->
+                ${renderComparisonChart(revenue, expenses, profit)}
 
                 ${renderChart()}
 
@@ -4446,6 +4658,116 @@
                 ${state.invoices.length === 0 ? 
                     '<div class="empty"><div class="empty-icon">📄</div>No invoices yet.<br>Create your first one!</div>' : 
                     state.invoices.slice(0, 3).map(renderInvoiceCard).join('')}
+            `;
+        }
+        
+        // Calculate stats based on selected period
+        function calculatePeriodStats() {
+            const now = new Date();
+            const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+            const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+            const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
+            
+            let invoices, expenses, lastPeriodInvoices, lastPeriodExpenses;
+            
+            if (state.dashboardPeriod === 'month') {
+                invoices = state.invoices.filter(i => new Date(i.created_at) >= thisMonthStart);
+                expenses = state.expenses.filter(e => new Date(e.date) >= thisMonthStart);
+                lastPeriodInvoices = state.invoices.filter(i => {
+                    const d = new Date(i.created_at);
+                    return d >= lastMonthStart && d <= lastMonthEnd;
+                });
+                lastPeriodExpenses = state.expenses.filter(e => {
+                    const d = new Date(e.date);
+                    return d >= lastMonthStart && d <= lastMonthEnd;
+                });
+            } else if (state.dashboardPeriod === 'lastMonth') {
+                invoices = state.invoices.filter(i => {
+                    const d = new Date(i.created_at);
+                    return d >= lastMonthStart && d <= lastMonthEnd;
+                });
+                expenses = state.expenses.filter(e => {
+                    const d = new Date(e.date);
+                    return d >= lastMonthStart && d <= lastMonthEnd;
+                });
+                lastPeriodInvoices = null;
+                lastPeriodExpenses = null;
+            } else {
+                invoices = state.invoices;
+                expenses = state.expenses;
+                lastPeriodInvoices = null;
+                lastPeriodExpenses = null;
+            }
+            
+            const revenue = invoices.reduce((s, i) => s + Number(i.amount_paid), 0);
+            const totalExpenses = expenses.reduce((s, e) => s + Number(e.amount), 0);
+            const totalInvoiced = invoices.reduce((s, i) => s + Number(i.amount), 0);
+            const profit = revenue - totalExpenses;
+            const collectionRate = totalInvoiced > 0 ? (revenue / totalInvoiced) * 100 : 0;
+            const paidCount = invoices.filter(i => getStatus(i) === 'paid').length;
+            
+            let lastPeriod = null;
+            if (lastPeriodInvoices) {
+                const lpCollected = lastPeriodInvoices.reduce((s, i) => s + Number(i.amount_paid), 0);
+                const lpOutstanding = lastPeriodInvoices.reduce((s, i) => s + (Number(i.amount) - Number(i.amount_paid)), 0);
+                lastPeriod = { collected: lpCollected, outstanding: lpOutstanding };
+            }
+            
+            return {
+                revenue,
+                expenses: totalExpenses,
+                profit,
+                collectionRate,
+                invoiceCount: invoices.length,
+                paidCount,
+                lastPeriod
+            };
+        }
+        
+        // Render month-over-month change indicator
+        function renderChangeIndicator(current, previous, inverseGood = false) {
+            if (previous === 0 && current === 0) return '';
+            const change = previous > 0 ? ((current - previous) / previous) * 100 : (current > 0 ? 100 : 0);
+            const isUp = change > 0;
+            const isGood = inverseGood ? !isUp : isUp;
+            if (Math.abs(change) < 1) return '<div class="stat-change neutral">— vs last month</div>';
+            return `<div class="stat-change ${isGood ? 'up' : 'down'}">${isUp ? '↑' : '↓'} ${Math.abs(change).toFixed(0)}% vs last month</div>`;
+        }
+        
+        // Render revenue vs expenses comparison chart
+        function renderComparisonChart(revenue, expenses, profit) {
+            const max = Math.max(revenue, expenses, 1);
+            const revenueHeight = (revenue / max) * 100;
+            const expensesHeight = (expenses / max) * 100;
+            const profitHeight = Math.abs(profit) / max * 100;
+            
+            return `
+                <div class="comparison-chart">
+                    <div class="comparison-title">📈 Financial Summary</div>
+                    <div class="comparison-bars">
+                        <div class="comparison-bar-group">
+                            <div class="comparison-bar-label">Revenue</div>
+                            <div class="comparison-bar-container">
+                                <div class="comparison-bar-fill revenue" style="height: ${revenueHeight}%"></div>
+                            </div>
+                            <div class="comparison-bar-value revenue">${formatNaira(revenue)}</div>
+                        </div>
+                        <div class="comparison-bar-group">
+                            <div class="comparison-bar-label">Expenses</div>
+                            <div class="comparison-bar-container">
+                                <div class="comparison-bar-fill expenses" style="height: ${expensesHeight}%"></div>
+                            </div>
+                            <div class="comparison-bar-value expenses">${formatNaira(expenses)}</div>
+                        </div>
+                        <div class="comparison-bar-group">
+                            <div class="comparison-bar-label">Profit</div>
+                            <div class="comparison-bar-container">
+                                <div class="comparison-bar-fill profit ${profit < 0 ? 'negative' : ''}" style="height: ${profitHeight}%"></div>
+                            </div>
+                            <div class="comparison-bar-value profit ${profit < 0 ? 'negative' : ''}">${formatNaira(profit)}</div>
+                        </div>
+                    </div>
+                </div>
             `;
         }
 
@@ -4667,15 +4989,13 @@
 
             const isDark = document.body.classList.contains('dark');
             const remindersEnabled = state.reminderSettings?.enabled;
-            const paymentHistory = state.paymentHistory || [];
-            const recentPaymentsCount = paymentHistory.filter(p => {
+            const recentPaymentsCount = state.paymentHistory.filter(p => {
                 const date = new Date(p.date);
                 const weekAgo = new Date();
                 weekAgo.setDate(weekAgo.getDate() - 7);
                 return date > weekAgo;
             }).length;
-            const quotes = state.quotes || [];
-            const pendingQuotes = quotes.filter(q => q.status === 'pending').length;
+            const pendingQuotes = state.quotes.filter(q => q.status === 'pending').length;
             
             return `
                 <div class="menu-section">Business</div>
@@ -4813,32 +5133,26 @@
         }
 
         function renderReportsPage() {
-            try {
-            // Defensive: ensure arrays exist
-            const invoices = state.invoices || [];
-            const expenses = state.expenses || [];
-            const customers = state.customers || [];
-            
-            const totalInvoiced = invoices.reduce((s, i) => s + Number(i.amount || 0), 0);
-            const totalCollected = invoices.reduce((s, i) => s + Number(i.amount_paid || 0), 0);
+            const totalInvoiced = state.invoices.reduce((s, i) => s + Number(i.amount), 0);
+            const totalCollected = state.invoices.reduce((s, i) => s + Number(i.amount_paid), 0);
             const collectionRate = totalInvoiced > 0 ? ((totalCollected / totalInvoiced) * 100).toFixed(1) : 0;
-            const overdueInvoices = invoices.filter(i => getStatus(i) === 'overdue');
-            const overdueAmount = overdueInvoices.reduce((s, i) => s + (Number(i.amount || 0) - Number(i.amount_paid || 0)), 0);
+            const overdueInvoices = state.invoices.filter(i => getStatus(i) === 'overdue');
+            const overdueAmount = overdueInvoices.reduce((s, i) => s + (Number(i.amount) - Number(i.amount_paid)), 0);
             
-            const totalExpenses = expenses.reduce((s, e) => s + Number(e.amount || 0), 0);
+            const totalExpenses = state.expenses.reduce((s, e) => s + Number(e.amount), 0);
             const profit = totalCollected - totalExpenses;
             
             // Monthly breakdown - current month
             const thisMonth = new Date().getMonth();
             const thisYear = new Date().getFullYear();
-            const monthlyRevenue = invoices.filter(i => {
+            const monthlyRevenue = state.invoices.filter(i => {
                 const d = new Date(i.created_at);
                 return d.getMonth() === thisMonth && d.getFullYear() === thisYear;
-            }).reduce((s, i) => s + Number(i.amount_paid || 0), 0);
-            const monthlyExpenses = expenses.filter(e => {
+            }).reduce((s, i) => s + Number(i.amount_paid), 0);
+            const monthlyExpenses = state.expenses.filter(e => {
                 const d = new Date(e.date);
                 return d.getMonth() === thisMonth && d.getFullYear() === thisYear;
-            }).reduce((s, e) => s + Number(e.amount || 0), 0);
+            }).reduce((s, e) => s + Number(e.amount), 0);
             const monthlyProfit = monthlyRevenue - monthlyExpenses;
 
             // Monthly trends - last 6 months
@@ -4850,29 +5164,29 @@
                 const month = d.getMonth();
                 const year = d.getFullYear();
                 
-                const monthRevenue = invoices.filter(inv => {
+                const revenue = state.invoices.filter(inv => {
                     const invDate = new Date(inv.created_at);
                     return invDate.getMonth() === month && invDate.getFullYear() === year;
-                }).reduce((s, inv) => s + Number(inv.amount_paid || 0), 0);
+                }).reduce((s, inv) => s + Number(inv.amount_paid), 0);
                 
-                const monthExpenses = expenses.filter(exp => {
+                const expenses = state.expenses.filter(exp => {
                     const expDate = new Date(exp.date);
                     return expDate.getMonth() === month && expDate.getFullYear() === year;
-                }).reduce((s, exp) => s + Number(exp.amount || 0), 0);
+                }).reduce((s, exp) => s + Number(exp.amount), 0);
                 
                 monthlyTrends.push({
                     label: monthNames[month],
-                    revenue: monthRevenue,
-                    expenses: monthExpenses,
-                    profit: monthRevenue - monthExpenses
+                    revenue,
+                    expenses,
+                    profit: revenue - expenses
                 });
             }
             const maxTrendValue = Math.max(...monthlyTrends.map(m => Math.max(m.revenue, m.expenses)), 1);
 
             // Best customers with payment speed
-            const bestCustomers = customers.map(c => {
-                const custInv = invoices.filter(i => i.customer_id === c.id);
-                const paidInvoices = custInv.filter(i => (i.amount_paid || 0) >= (i.amount || 0));
+            const bestCustomers = state.customers.map(c => {
+                const custInv = state.invoices.filter(i => i.customer_id === c.id);
+                const paidInvoices = custInv.filter(i => i.amount_paid >= i.amount);
                 let avgPayDays = 0;
                 if (paidInvoices.length > 0) {
                     const totalDays = paidInvoices.reduce((s, inv) => {
@@ -4884,35 +5198,34 @@
                 }
                 return { 
                     name: c.name, 
-                    total: custInv.reduce((s, i) => s + Number(i.amount_paid || 0), 0),
+                    total: custInv.reduce((s, i) => s + Number(i.amount_paid), 0),
                     invoiceCount: custInv.length,
                     avgPayDays
                 };
             }).filter(c => c.total > 0).sort((a, b) => b.total - a.total).slice(0, 5);
 
             // Top debtors
-            const customerDebts = customers.map(c => {
-                const custInv = invoices.filter(i => i.customer_id === c.id);
+            const customerDebts = state.customers.map(c => {
+                const custInv = state.invoices.filter(i => i.customer_id === c.id);
                 const overdueCount = custInv.filter(i => getStatus(i) === 'overdue').length;
                 return { 
                     name: c.name, 
-                    owed: custInv.reduce((s, i) => s + (Number(i.amount || 0) - Number(i.amount_paid || 0)), 0),
+                    owed: custInv.reduce((s, i) => s + (Number(i.amount) - Number(i.amount_paid)), 0),
                     overdueCount
                 };
             }).filter(c => c.owed > 0).sort((a, b) => b.owed - a.owed).slice(0, 5);
             
             // Product/Service performance
             const productStats = {};
-            invoices.forEach(inv => {
+            state.invoices.forEach(inv => {
                 if (inv.items && inv.items.length > 0) {
                     inv.items.forEach(item => {
-                        const key = (item.name || '').toLowerCase().trim();
-                        if (!key) return;
+                        const key = item.name.toLowerCase().trim();
                         if (!productStats[key]) {
                             productStats[key] = { name: item.name, qty: 0, revenue: 0, count: 0 };
                         }
                         productStats[key].qty += Number(item.qty) || 1;
-                        productStats[key].revenue += (Number(item.qty) || 1) * Number(item.price || 0);
+                        productStats[key].revenue += (Number(item.qty) || 1) * Number(item.price);
                         productStats[key].count++;
                     });
                 }
@@ -4926,15 +5239,15 @@
             const next14 = new Date(today); next14.setDate(next14.getDate() + 14);
             const next30 = new Date(today); next30.setDate(next30.getDate() + 30);
             
-            const unpaidInvoices = invoices.filter(i => (i.amount_paid || 0) < (i.amount || 0));
+            const unpaidInvoices = state.invoices.filter(i => i.amount_paid < i.amount);
             
             const forecast7 = unpaidInvoices.filter(i => new Date(i.due_date) <= next7)
-                .reduce((s, i) => s + (Number(i.amount || 0) - Number(i.amount_paid || 0)), 0);
+                .reduce((s, i) => s + (Number(i.amount) - Number(i.amount_paid)), 0);
             const forecast14 = unpaidInvoices.filter(i => new Date(i.due_date) <= next14)
-                .reduce((s, i) => s + (Number(i.amount || 0) - Number(i.amount_paid || 0)), 0);
+                .reduce((s, i) => s + (Number(i.amount) - Number(i.amount_paid)), 0);
             const forecast30 = unpaidInvoices.filter(i => new Date(i.due_date) <= next30)
-                .reduce((s, i) => s + (Number(i.amount || 0) - Number(i.amount_paid || 0)), 0);
-            const overdueTotal = overdueInvoices.reduce((s, i) => s + (Number(i.amount || 0) - Number(i.amount_paid || 0)), 0);
+                .reduce((s, i) => s + (Number(i.amount) - Number(i.amount_paid)), 0);
+            const overdueTotal = overdueInvoices.reduce((s, i) => s + (Number(i.amount) - Number(i.amount_paid)), 0);
 
             return `
                 <button class="back-btn" data-back>← Back</button>
@@ -5108,23 +5421,10 @@
                     <div class="report-row"><span class="report-label">Overdue Invoices</span><span class="report-value red">${overdueInvoices.length}</span></div>
                 </div>
             `;
-            } catch (err) {
-                console.error('Reports page error:', err);
-                return `
-                    <button class="back-btn" data-back>← Back</button>
-                    <div class="section-title" style="margin-bottom: 16px;">📊 Business Reports</div>
-                    <div class="card" style="padding:20px;text-align:center;">
-                        <p style="color:#dc2626;">Error loading reports. Please try again.</p>
-                        <p style="color:#666;font-size:12px;margin-top:8px;">${err.message || 'Unknown error'}</p>
-                        <button class="btn btn-primary" onclick="location.reload()" style="margin-top:16px;">🔄 Refresh Page</button>
-                    </div>
-                `;
-            }
         }
 
         function renderQuotesPage() {
-            const quotes = state.quotes || [];
-            const sortedQuotes = [...quotes].sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+            const sortedQuotes = [...state.quotes].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
             
             return `
                 <button class="back-btn" data-back>← Back</button>
@@ -5137,8 +5437,7 @@
                 ${sortedQuotes.length === 0 ? 
                     '<div class="empty"><div class="empty-icon">📝</div>No quotes yet.<br>Create your first quote!</div>' :
                     sortedQuotes.map(quote => {
-                        const customers = state.customers || [];
-                        const cust = customers.find(c => c.id === quote.customer_id);
+                        const cust = state.customers.find(c => c.id === quote.customer_id);
                         const statusColors = { pending: '#f59e0b', approved: '#16a34a', declined: '#dc2626', converted: '#3b82f6' };
                         return `
                             <div class="card">
@@ -5167,24 +5466,17 @@
         }
 
         function renderBackupPage() {
-            const customers = state.customers || [];
-            const invoices = state.invoices || [];
-            const quotes = state.quotes || [];
-            const products = state.products || [];
-            const expenses = state.expenses || [];
-            const paymentHistory = state.paymentHistory || [];
-            
             const dataSize = JSON.stringify({
-                customers,
-                invoices,
-                quotes,
-                products,
-                expenses,
-                businessProfile: state.businessProfile || {},
-                paymentHistory,
-                recurringTemplates: state.recurringTemplates || [],
-                reminderSettings: state.reminderSettings || {},
-                invoiceTemplate: state.invoiceTemplate || {}
+                customers: state.customers,
+                invoices: state.invoices,
+                quotes: state.quotes,
+                products: state.products,
+                expenses: state.expenses,
+                businessProfile: state.businessProfile,
+                paymentHistory: state.paymentHistory,
+                recurringTemplates: state.recurringTemplates,
+                reminderSettings: state.reminderSettings,
+                invoiceTemplate: state.invoiceTemplate
             }).length;
             const sizeKB = (dataSize / 1024).toFixed(1);
             
@@ -5195,12 +5487,12 @@
                 
                 <div class="report-card">
                     <div class="report-title">📊 Your Data</div>
-                    <div class="report-row"><span class="report-label">Customers</span><span class="report-value">${customers.length}</span></div>
-                    <div class="report-row"><span class="report-label">Invoices</span><span class="report-value">${invoices.length}</span></div>
-                    <div class="report-row"><span class="report-label">Quotes</span><span class="report-value">${quotes.length}</span></div>
-                    <div class="report-row"><span class="report-label">Products</span><span class="report-value">${products.length}</span></div>
-                    <div class="report-row"><span class="report-label">Expenses</span><span class="report-value">${expenses.length}</span></div>
-                    <div class="report-row"><span class="report-label">Payment Records</span><span class="report-value">${paymentHistory.length}</span></div>
+                    <div class="report-row"><span class="report-label">Customers</span><span class="report-value">${state.customers.length}</span></div>
+                    <div class="report-row"><span class="report-label">Invoices</span><span class="report-value">${state.invoices.length}</span></div>
+                    <div class="report-row"><span class="report-label">Quotes</span><span class="report-value">${state.quotes.length}</span></div>
+                    <div class="report-row"><span class="report-label">Products</span><span class="report-value">${state.products.length}</span></div>
+                    <div class="report-row"><span class="report-label">Expenses</span><span class="report-value">${state.expenses.length}</span></div>
+                    <div class="report-row"><span class="report-label">Payment Records</span><span class="report-value">${state.paymentHistory.length}</span></div>
                     <div class="report-row" style="border-top:1px solid #eee;margin-top:8px;padding-top:8px;"><span class="report-label">Total Size</span><span class="report-value">${sizeKB} KB</span></div>
                 </div>
 
@@ -5233,15 +5525,12 @@
             const planName = plan?.display_name || 'Free';
             const isFreePlan = plan?.name === 'free' || !plan;
             
-            const customers = state.customers || [];
-            const products = state.products || [];
-            
             // Current usage
             const usage = {
-                customers: { current: customers.length, limit: plan?.max_customers || 5 },
+                customers: { current: state.customers.length, limit: plan?.max_customers || 5 },
                 invoices: { current: state.subscription?.invoices_this_month || 0, limit: plan?.max_invoices_per_month || 10 },
                 quotes: { current: state.subscription?.quotes_this_month || 0, limit: plan?.max_quotes_per_month || 5 },
-                products: { current: products.length, limit: plan?.max_products || 10 },
+                products: { current: state.products.length, limit: plan?.max_products || 10 },
                 sms: { current: state.subscription?.sms_this_month || 0, limit: plan?.max_sms_per_month || 0 }
             };
             
@@ -6449,6 +6738,14 @@
             document.getElementById('btn-new-invoice')?.addEventListener('click', showInvoiceModal);
             document.getElementById('btn-new-customer')?.addEventListener('click', showCustomerModal);
             document.querySelector('[data-goto="invoices"]')?.addEventListener('click', () => { state.activeTab = 'invoices'; render(); });
+            
+            // Period Filter (Dashboard)
+            document.querySelectorAll('[data-period]').forEach(btn => {
+                btn.onclick = () => { 
+                    state.dashboardPeriod = btn.dataset.period; 
+                    render(); 
+                };
+            });
 
             // AI Assistant
             document.getElementById('ai-assistant-btn')?.addEventListener('click', openAIAssistant);
@@ -6530,13 +6827,9 @@
             }
             
             // Paystack settings
-            document.getElementById('toggle-paystack')?.addEventListener('click', async () => {
+            document.getElementById('toggle-paystack')?.addEventListener('click', () => {
                 state.businessProfile.paystackEnabled = !state.businessProfile.paystackEnabled;
-                try {
-                    await db.updateBusiness({ paystack_enabled: state.businessProfile.paystackEnabled });
-                } catch (err) {
-                    console.error('Failed to sync paystack toggle:', err);
-                }
+                localStorage.setItem('owomi_business', JSON.stringify(state.businessProfile));
                 render();
             });
             document.getElementById('btn-save-paystack')?.addEventListener('click', savePaystackSettings);
@@ -6634,32 +6927,22 @@
             document.querySelectorAll('[data-quote-pdf]').forEach(btn => { btn.onclick = () => generateQuotePDF(btn.dataset.quotePdf); });
             document.querySelectorAll('[data-convert-quote]').forEach(btn => { btn.onclick = () => convertQuoteToInvoice(btn.dataset.convertQuote); });
             document.querySelectorAll('[data-quote-status]').forEach(btn => {
-                btn.onclick = async () => {
+                btn.onclick = () => {
                     const quote = state.quotes.find(q => q.id === btn.dataset.quoteStatus);
                     if (quote) {
                         quote.status = btn.dataset.status;
-                        try {
-                            await db.updateQuote(quote.id, { status: btn.dataset.status });
-                        } catch (err) {
-                            console.error('Failed to sync quote status:', err);
-                        }
+                        localStorage.setItem('owomi_quotes', JSON.stringify(state.quotes));
                         showToast(`Quote marked as ${btn.dataset.status}`, 'success');
                         render();
                     }
                 };
             });
             document.querySelectorAll('[data-delete-quote]').forEach(btn => {
-                btn.onclick = async () => {
+                btn.onclick = () => {
                     if (confirm('Delete this quote?')) {
-                        try {
-                            await db.deleteQuote(btn.dataset.deleteQuote);
-                            state.quotes = state.quotes.filter(q => q.id !== btn.dataset.deleteQuote);
-                            showToast('Quote deleted', 'success');
-                            render();
-                        } catch (err) {
-                            console.error('Failed to delete quote:', err);
-                            showToast('Error deleting quote', 'error');
-                        }
+                        state.quotes = state.quotes.filter(q => q.id !== btn.dataset.deleteQuote);
+                        localStorage.setItem('owomi_quotes', JSON.stringify(state.quotes));
+                        render();
                     }
                 };
             });
@@ -7742,16 +8025,12 @@
             
             // Mark all customer's invoices as viewed when they open the portal
             const customerInvoices = state.invoices.filter(inv => inv.customer_id === state.portalCustomerId);
-            customerInvoices.forEach(async (inv) => {
+            customerInvoices.forEach(inv => {
                 if (!inv.viewed_at) {
                     inv.viewed_at = new Date().toISOString();
-                    try {
-                        await db.updateInvoice(inv.id, { viewed_at: inv.viewed_at });
-                    } catch (err) {
-                        console.error('Failed to sync viewed_at:', err);
-                    }
                 }
             });
+            localStorage.setItem('owomi_invoices', JSON.stringify(state.invoices));
             
             attachPortalEvents();
         }
@@ -7801,15 +8080,12 @@
             });
         }
         
-        async function markInvoiceViewed(invoiceId) {
+        function markInvoiceViewed(invoiceId) {
             const inv = state.invoices.find(i => i.id === invoiceId);
             if (inv && !inv.viewed_at) {
                 inv.viewed_at = new Date().toISOString();
-                try {
-                    await db.updateInvoice(inv.id, { viewed_at: inv.viewed_at });
-                } catch (err) {
-                    console.error('Failed to sync viewed_at:', err);
-                }
+                localStorage.setItem('owomi_invoices', JSON.stringify(state.invoices));
+                // Could also sync to Supabase here for real-time tracking
             }
         }
         
@@ -7840,64 +8116,33 @@
                         { display_name: 'Invoice', variable_name: 'invoice', value: invoiceId || 'Multiple' }
                     ]
                 },
-                callback: async function(response) {
+                callback: function(response) {
                     // Payment successful
                     if (isPayAll) {
                         // Mark all unpaid invoices as paid
                         const unpaid = state.invoices.filter(i => i.customer_id === state.portalCustomerId && getStatus(i) !== 'paid');
-                        for (const inv of unpaid) {
-                            const payAmount = inv.amount - inv.amount_paid;
+                        unpaid.forEach(inv => {
                             inv.amount_paid = inv.amount;
                             inv.paid_date = new Date().toISOString();
-                            
-                            // Sync to Supabase
-                            try {
-                                await db.updateInvoice(inv.id, { amount_paid: inv.amount, paid_date: inv.paid_date });
-                                await db.createPayment({
-                                    invoice_id: inv.id,
-                                    customer_id: cust.id,
-                                    amount: payAmount,
-                                    method: 'paystack',
-                                    notes: 'Portal payment - ' + response.reference
-                                });
-                            } catch (err) {
-                                console.error('Failed to sync payment:', err);
-                            }
-                            
                             state.paymentHistory.push({
                                 id: 'pay-' + Date.now(),
                                 invoiceId: inv.id,
                                 customerId: cust.id,
                                 customerName: cust.name,
                                 invoiceNumber: inv.invoice_number,
-                                amount: payAmount,
+                                amount: inv.amount - inv.amount_paid,
                                 method: 'paystack',
                                 note: 'Portal payment - ' + response.reference,
                                 date: new Date().toISOString(),
                                 isFullPayment: true
                             });
-                        }
+                        });
                     } else {
                         // Mark single invoice as paid
                         const inv = state.invoices.find(i => i.id === invoiceId);
                         if (inv) {
                             inv.amount_paid = inv.amount;
                             inv.paid_date = new Date().toISOString();
-                            
-                            // Sync to Supabase
-                            try {
-                                await db.updateInvoice(inv.id, { amount_paid: inv.amount, paid_date: inv.paid_date });
-                                await db.createPayment({
-                                    invoice_id: inv.id,
-                                    customer_id: cust.id,
-                                    amount: amount,
-                                    method: 'paystack',
-                                    notes: 'Portal payment - ' + response.reference
-                                });
-                            } catch (err) {
-                                console.error('Failed to sync payment:', err);
-                            }
-                            
                             state.paymentHistory.push({
                                 id: 'pay-' + Date.now(),
                                 invoiceId: inv.id,
@@ -7912,6 +8157,10 @@
                             });
                         }
                     }
+                    
+                    // Save to localStorage
+                    localStorage.setItem('owomi_invoices', JSON.stringify(state.invoices));
+                    localStorage.setItem('owomi_payments', JSON.stringify(state.paymentHistory));
                     
                     // Show success and refresh
                     alert('🎉 Payment successful!\n\nReference: ' + response.reference + '\n\nThank you for your payment!');
@@ -9014,27 +9263,18 @@
                 else if (qFixed.includes('supply') || qFixed.includes('office') || qFixed.includes('equipment')) category = 'Supplies';
                 else if (qFixed.includes('ads') || qFixed.includes('marketing') || qFixed.includes('advert')) category = 'Marketing';
                 
-                const expenseData = {
+                const expense = {
+                    id: 'exp-' + Date.now(),
                     description: description.charAt(0).toUpperCase() + description.slice(1),
                     amount,
                     category,
                     date: new Date().toISOString().split('T')[0]
                 };
                 
-                try {
-                    const created = await db.createExpense(expenseData);
-                    if (created) {
-                        state.expenses.push({
-                            id: created.id,
-                            ...expenseData
-                        });
-                    }
-                } catch (err) {
-                    console.error('Failed to create expense:', err);
-                    return '❌ Error saving expense. Please try again.';
-                }
+                state.expenses.push(expense);
+                localStorage.setItem('owomi_expenses', JSON.stringify(state.expenses));
                 
-                return `✅ Expense recorded!\n\n💸 ₦${amount.toLocaleString()}\n📝 ${expenseData.description}\n🏷️ ${category}\n\nYour expenses this month affect your profit. Check "Show summary" to see net profit.`;
+                return `✅ Expense recorded!\n\n💸 ₦${amount.toLocaleString()}\n📝 ${expense.description}\n🏷️ ${category}\n\nYour expenses this month affect your profit. Check "Show summary" to see net profit.`;
             }
             
             // ============ ADD PRODUCT ============
@@ -9047,26 +9287,17 @@
                 }
                 
                 const name = nameMatch[1].trim();
-                const productData = {
+                const product = {
+                    id: 'prod-' + Date.now(),
                     name: name.charAt(0).toUpperCase() + name.slice(1),
                     price: amount,
                     description: ''
                 };
                 
-                try {
-                    const created = await db.createProduct(productData);
-                    if (created) {
-                        state.products.push({
-                            id: created.id,
-                            ...productData
-                        });
-                    }
-                } catch (err) {
-                    console.error('Failed to create product:', err);
-                    return '❌ Error saving product. Please try again.';
-                }
+                state.products.push(product);
+                localStorage.setItem('owomi_products', JSON.stringify(state.products));
                 
-                return `✅ Product added!\n\n📦 ${productData.name}\n💰 ₦${amount.toLocaleString()}\n\nNow you can quickly add this to invoices!`;
+                return `✅ Product added!\n\n📦 ${product.name}\n💰 ₦${amount.toLocaleString()}\n\nNow you can quickly add this to invoices!`;
             }
             
             // ============ LIST CUSTOMERS ============
@@ -9767,27 +9998,14 @@
                         { display_name: "Customer", variable_name: "customer", value: cust?.name || 'Customer' }
                     ]
                 },
-                callback: async function(response) {
+                callback: function(response) {
                     // Payment successful!
                     console.log('Payment success:', response);
                     
                     // Update invoice as paid
                     inv.amount_paid = inv.amount;
                     inv.paid_date = new Date().toISOString();
-                    
-                    // Sync to Supabase
-                    try {
-                        await db.updateInvoice(inv.id, { amount_paid: inv.amount, paid_date: inv.paid_date });
-                        await db.createPayment({
-                            invoice_id: inv.id,
-                            customer_id: inv.customer_id,
-                            amount: owed,
-                            method: 'paystack',
-                            notes: 'Paystack - ' + response.reference
-                        });
-                    } catch (err) {
-                        console.error('Failed to sync payment:', err);
-                    }
+                    localStorage.setItem('owomi_invoices', JSON.stringify(state.invoices));
                     
                     // Record payment in history
                     state.paymentHistory.push({
@@ -9798,6 +10016,7 @@
                         reference: response.reference,
                         date: new Date().toISOString()
                     });
+                    localStorage.setItem('owomi_payments', JSON.stringify(state.paymentHistory));
                     
                     showToast(`✅ Payment of ${formatNaira(owed)} received!`, 'success');
                     render();
@@ -10008,42 +10227,25 @@
                 const vat = includeVat ? subtotal * 0.075 : 0;
                 const total = subtotal + vat;
                 
-                const quoteData = {
+                const quote = {
+                    id: 'quote-' + Date.now(),
                     customer_id: customerId,
                     description,
                     items,
                     subtotal,
-                    vat_amount: vat,
+                    vat,
                     amount: total,
                     include_vat: includeVat,
                     valid_days: validDays,
-                    status: 'pending'
+                    status: 'pending',
+                    created_at: new Date().toISOString()
                 };
                 
-                try {
-                    const created = await db.createQuote(quoteData);
-                    if (created) {
-                        state.quotes.push({
-                            id: created.id,
-                            customer_id: created.customer_id,
-                            description: created.description,
-                            items: created.items,
-                            subtotal: parseFloat(created.subtotal),
-                            vat: parseFloat(created.vat_amount) || 0,
-                            amount: parseFloat(created.amount),
-                            include_vat: created.include_vat,
-                            valid_days: created.valid_days,
-                            status: created.status,
-                            created_at: created.created_at
-                        });
-                        closeModal();
-                        showToast('Quote created!', 'success');
-                        render();
-                    }
-                } catch (err) {
-                    console.error('Failed to create quote:', err);
-                    showToast('Error saving quote', 'error');
-                }
+                state.quotes.push(quote);
+                localStorage.setItem('owomi_quotes', JSON.stringify(state.quotes));
+                closeModal();
+                showToast('Quote created!', 'success');
+                render();
             };
         }
 
@@ -10126,7 +10328,7 @@
             }
         }
 
-        async function convertQuoteToInvoice(quoteId) {
+        function convertQuoteToInvoice(quoteId) {
             const quote = state.quotes.find(q => q.id === quoteId);
             if (!quote) return;
             
@@ -10135,7 +10337,8 @@
                 const dueDate = new Date();
                 dueDate.setDate(dueDate.getDate() + 14); // 14 days from now
                 
-                const invoiceData = {
+                const invoice = {
+                    id: 'inv-' + Date.now(),
                     invoice_number: invoiceNumber,
                     customer_id: quote.customer_id,
                     description: quote.description,
@@ -10143,43 +10346,22 @@
                     amount: quote.amount,
                     amount_paid: 0,
                     include_vat: quote.include_vat,
-                    vat_amount: quote.vat || 0,
+                    vat: quote.vat,
                     subtotal: quote.subtotal,
-                    due_date: dueDate.toISOString().split('T')[0]
+                    due_date: dueDate.toISOString().split('T')[0],
+                    created_at: new Date().toISOString()
                 };
                 
-                try {
-                    // Create invoice in Supabase
-                    const created = await db.createInvoice(invoiceData);
-                    if (created) {
-                        state.invoices.push({
-                            id: created.id,
-                            invoice_number: created.invoice_number,
-                            customer_id: created.customer_id,
-                            description: created.description,
-                            items: created.items,
-                            amount: parseFloat(created.amount),
-                            amount_paid: 0,
-                            include_vat: created.include_vat,
-                            vat: parseFloat(created.vat_amount) || 0,
-                            subtotal: parseFloat(created.subtotal),
-                            due_date: created.due_date,
-                            created_at: created.created_at
-                        });
-                        
-                        // Update quote status
-                        quote.status = 'converted';
-                        await db.updateQuote(quote.id, { status: 'converted' });
-                        
-                        showToast('Quote converted to invoice!', 'success');
-                        state.menuPage = null;
-                        state.activeTab = 'invoices';
-                        render();
-                    }
-                } catch (err) {
-                    console.error('Failed to convert quote:', err);
-                    showToast('Error converting quote', 'error');
-                }
+                state.invoices.push(invoice);
+                localStorage.setItem('owomi_invoices', JSON.stringify(state.invoices));
+                
+                quote.status = 'converted';
+                localStorage.setItem('owomi_quotes', JSON.stringify(state.quotes));
+                
+                showToast('Quote converted to invoice!', 'success');
+                state.menuPage = null;
+                state.activeTab = 'invoices';
+                render();
             }
         }
 
@@ -10694,46 +10876,27 @@
             return date;
         }
         
-        async function createInvoiceFromAI(customerId, description, amount, dueDate) {
+        function createInvoiceFromAI(customerId, description, amount, dueDate) {
             const invoiceNumber = 'INV-' + String(state.invoices.length + 1).padStart(4, '0');
-            
-            const invoiceData = {
+            const invoice = {
+                id: 'inv-' + Date.now(),
                 invoice_number: invoiceNumber,
                 customer_id: customerId,
                 description: description,
                 items: [{ name: description, qty: 1, price: amount }],
                 amount: amount,
                 amount_paid: 0,
-                due_date: dueDate
+                due_date: dueDate,
+                created_at: new Date().toISOString()
             };
             
-            try {
-                const created = await db.createInvoice(invoiceData);
-                if (created) {
-                    state.invoices.unshift({
-                        id: created.id,
-                        invoice_number: created.invoice_number,
-                        customer_id: created.customer_id,
-                        description: created.description,
-                        items: created.items || invoiceData.items,
-                        amount: parseFloat(created.amount),
-                        amount_paid: 0,
-                        due_date: created.due_date,
-                        created_at: created.created_at
-                    });
-                    
-                    // Track usage for subscription limits
-                    await db.incrementUsage('invoice');
-                    
-                    closeAIAssistant();
-                    showToast(`✅ Invoice ${invoiceNumber} created!`, 'success');
-                    state.activeTab = 'invoices';
-                    render();
-                }
-            } catch (err) {
-                console.error('Failed to create invoice:', err);
-                showToast('Error creating invoice', 'error');
-            }
+            state.invoices.unshift(invoice);
+            localStorage.setItem('owomi_invoices', JSON.stringify(state.invoices));
+            
+            closeAIAssistant();
+            showToast(`✅ Invoice ${invoiceNumber} created!`, 'success');
+            state.activeTab = 'invoices';
+            render();
         }
         window.createInvoiceFromAI = createInvoiceFromAI;
 
@@ -10757,7 +10920,7 @@
         }
 
         async function saveSettings() {
-            // Keep existing logo and QR if present (stored in localStorage only)
+            // Keep existing logo and QR if present
             const existingLogo = state.businessProfile.logo;
             const existingQR = state.businessProfile.paymentQR;
             
@@ -10773,18 +10936,16 @@
                 paymentQR: existingQR
             };
             
-            // Save images to localStorage (don't sync to database - too large)
-            localStorage.setItem('owomi_business', JSON.stringify(state.businessProfile));
-            
             try {
-                // Sync text fields to Supabase (no images)
                 await db.updateBusiness({
                     name: state.businessProfile.name,
                     phone: state.businessProfile.phone,
                     email: state.businessProfile.email,
                     address: state.businessProfile.address,
                     bank_details: state.businessProfile.bank,
-                    footer_note: state.businessProfile.footerNote
+                    footer_note: state.businessProfile.footerNote,
+                    logo_url: state.businessProfile.logo,
+                    qr_code_url: state.businessProfile.paymentQR
                 });
                 showToast('Business settings saved!', 'success');
             } catch (err) {
@@ -10798,14 +10959,12 @@
             state.businessProfile.footerNote = document.getElementById('set-footer')?.value.trim() || '';
             state.businessProfile.termsAndConditions = document.getElementById('set-terms')?.value.trim() || '';
             
-            // Save template color/style to localStorage only (cosmetic)
-            localStorage.setItem('owomi_template', JSON.stringify(state.invoiceTemplate));
-            
             try {
-                // Sync text content to Supabase (footer note, terms - business content)
                 await db.updateBusiness({
                     footer_note: state.businessProfile.footerNote,
-                    terms_and_conditions: state.businessProfile.termsAndConditions
+                    terms_and_conditions: state.businessProfile.termsAndConditions,
+                    invoice_color: state.invoiceTemplate.color,
+                    invoice_style: state.invoiceTemplate.style
                 });
                 showToast('Template settings saved!', 'success');
             } catch (err) {
@@ -10814,7 +10973,7 @@
             }
         }
         
-        async function savePaystackSettings() {
+        function savePaystackSettings() {
             const publicKey = document.getElementById('set-paystack-public')?.value.trim() || '';
             
             // Validate key
@@ -10826,17 +10985,9 @@
             }
             
             state.businessProfile.paystackPublicKey = publicKey;
+            localStorage.setItem('owomi_business', JSON.stringify(state.businessProfile));
             
-            try {
-                await db.updateBusiness({
-                    paystack_enabled: state.businessProfile.paystackEnabled,
-                    paystack_public_key: publicKey
-                });
-                showToast('Paystack settings saved!', 'success');
-            } catch (err) {
-                console.error('Failed to save Paystack settings:', err);
-                showToast('Error saving Paystack settings', 'error');
-            }
+            showToast('Paystack settings saved!', 'success');
         }
         
         function generatePDFWithTemplate(invoice, customer) {
@@ -11054,4 +11205,4 @@
         });
     </script>
 </body>
-    </html>
+</html>
