@@ -2933,6 +2933,7 @@
                             logo: business.logo_url || '',
                             qrCode: business.qr_code_url || '',
                             footerNote: business.footer_note || '',
+                            termsAndConditions: business.terms_and_conditions || '',
                             paystackEnabled: business.paystack_enabled || false,
                             paystackPublicKey: business.paystack_public_key || ''
                         };
@@ -3051,6 +3052,12 @@
                         status: h.status,
                         sentAt: h.sent_at
                     }));
+                    
+                    // Also load from localStorage as backup/merge
+                    const localHistory = JSON.parse(localStorage.getItem('owomi_reminder_history') || '[]');
+                    if (localHistory.length > 0 && state.reminderHistory.length === 0) {
+                        state.reminderHistory = localHistory;
+                    }
 
                     // Subscription data
                     state.plans = plans || [];
@@ -4610,11 +4617,12 @@
             const status = getStatus(inv);
             const invNumber = inv.invoice_number || `INV-${inv.id.slice(0, 3).toUpperCase()}`;
             const itemCount = inv.items?.length || 1;
+            const viewedIndicator = inv.viewed_at ? `<span style="color:#16a34a;font-size:11px;" title="Viewed ${formatDate(inv.viewed_at)}">👁️ Viewed</span>` : '';
             return `
                 <div class="card">
                     <div class="card-top">
                         <div>
-                            <div class="card-name">${cust?.name || 'Unknown'} <span style="color:#3b82f6;font-size:12px;font-weight:600;">${invNumber}</span></div>
+                            <div class="card-name">${cust?.name || 'Unknown'} <span style="color:#3b82f6;font-size:12px;font-weight:600;">${invNumber}</span> ${viewedIndicator}</div>
                             <div class="card-desc">${inv.description} ${itemCount > 1 ? `<span style="color:#999;">(${itemCount} items)</span>` : ''}</div>
                             <div class="card-date">Due: ${formatDate(inv.due_date)}</div>
                         </div>
@@ -5567,6 +5575,12 @@
                         <label class="form-label">Invoice Footer Note</label>
                         <textarea class="form-input" id="set-footer" rows="2" placeholder="Thank you for your business!">${p.footerNote || ''}</textarea>
                     </div>
+                    
+                    <div class="form-group" style="margin-top:16px;">
+                        <label class="form-label">Terms & Conditions (optional)</label>
+                        <textarea class="form-input" id="set-terms" rows="3" placeholder="E.g., Payment is due within 14 days. Late payments may incur a 5% fee.">${p.termsAndConditions || ''}</textarea>
+                        <div style="font-size:11px;color:#888;margin-top:4px;">Appears at the bottom of invoices</div>
+                    </div>
                 </div>
 
                 <button class="btn btn-primary" id="btn-save-template" style="margin-top:16px;">Save Template Settings</button>
@@ -6092,7 +6106,7 @@
                                     </div>
                                     <div style="text-align:right;">
                                         <div style="font-size:12px;color:#666;">${formatDate(h.sentAt)}</div>
-                                        <span style="font-size:11px;color:${h.status === 'sent' ? '#16a34a' : '#dc2626'};">${h.status === 'sent' ? '✓ Sent' : '✗ Failed'}</span>
+                                        <span style="font-size:11px;color:#16a34a;">✓ Sent</span>
                                     </div>
                                 </div>
                             </div>
@@ -6632,7 +6646,7 @@
             document.getElementById('btn-clear-history')?.addEventListener('click', async () => {
                 if (confirm('Clear all reminder history?')) {
                     try {
-                        await db.clearReminderHistory();
+                        localStorage.removeItem('owomi_reminder_history');
                         state.reminderHistory = [];
                         showToast('History cleared', 'info');
                         render();
@@ -6852,51 +6866,61 @@
             const channel = state.reminderSettings?.channel || 'whatsapp';
             const owed = inv.amount - inv.amount_paid;
             
-            // Log the reminder
-            const historyEntry = {
-                id: Date.now(),
-                invoiceId: inv.id,
-                customerId: cust.id,
-                customerName: cust.name,
-                amount: owed,
-                channel: channel,
-                sentAt: new Date().toISOString(),
-                status: 'sent'
-            };
+            if (channel === 'whatsapp') {
+                // WhatsApp opens a modal - handle separately
+                try {
+                    sendWhatsApp(invoiceId);
+                    logReminderLocally(inv, cust, 'whatsapp');
+                } catch (err) {
+                    console.error('WhatsApp modal error:', err);
+                    // Still show the modal even if logging fails
+                }
+                return; // Don't show success toast - user needs to send manually
+            }
             
             try {
-                if (channel === 'whatsapp' || channel === 'both') {
-                    sendWhatsApp(invoiceId);
-                }
-                
-                if (channel === 'sms' || channel === 'both') {
+                if (channel === 'sms') {
                     await sendSMS(invoiceId);
+                    logReminderLocally(inv, cust, 'sms');
+                    showToast(`SMS reminder sent to ${cust.name}! 📤`, 'success');
                 }
                 
-                // Save to database
-                await db.createReminderHistory({
-                    invoice_id: inv.id,
-                    type: 'manual',
-                    channel: channel,
-                    status: 'sent'
-                });
+                if (channel === 'both') {
+                    sendWhatsApp(invoiceId);
+                    await sendSMS(invoiceId);
+                    logReminderLocally(inv, cust, 'both');
+                    showToast(`Reminders sent to ${cust.name}! 📤`, 'success');
+                }
                 
-                showToast(`Reminder sent to ${cust.name}! 📤`, 'success');
                 render();
             } catch (err) {
-                // Log failed attempt
-                try {
-                    await db.createReminderHistory({
-                        invoice_id: inv.id,
-                        type: 'manual',
-                        channel: channel,
-                        status: 'failed'
-                    });
-                } catch (e) {
-                    console.error('Failed to log reminder history:', e);
-                }
+                console.error('Reminder error:', err);
+                showToast('Failed to send reminder: ' + (err.message || 'Unknown error'), 'error');
+            }
+        }
+        
+        // Log reminder to local storage (simpler than database for now)
+        function logReminderLocally(inv, cust, channel) {
+            try {
+                const history = JSON.parse(localStorage.getItem('owomi_reminder_history') || '[]');
+                history.unshift({
+                    id: Date.now(),
+                    invoiceId: inv?.id || 'unknown',
+                    invoiceNumber: inv?.invoice_number || 'INV',
+                    customerId: cust?.id || 'unknown',
+                    customerName: cust?.name || 'Customer',
+                    amount: (inv?.amount || 0) - (inv?.amount_paid || 0),
+                    channel: channel,
+                    sentAt: new Date().toISOString(),
+                    status: 'sent'
+                });
+                // Keep last 100 entries
+                localStorage.setItem('owomi_reminder_history', JSON.stringify(history.slice(0, 100)));
                 
-                showToast('Failed to send reminder', 'error');
+                // Update state for display
+                state.reminderHistory = history.slice(0, 100);
+            } catch (err) {
+                console.error('Error logging reminder:', err);
             }
         }
         
@@ -7157,6 +7181,10 @@
                                     <span>VAT (7.5%):</span>
                                     <span id="inv-vat-amount">₦0</span>
                                 </div>
+                                <div id="inv-shipping-row" style="display:none;justify-content:space-between;margin-bottom:8px;color:#0369a1;">
+                                    <span id="inv-shipping-label">Shipping:</span>
+                                    <span id="inv-shipping-display">₦0</span>
+                                </div>
                                 <div style="display:flex;justify-content:space-between;font-weight:700;font-size:18px;border-top:2px solid #3b82f6;padding-top:8px;">
                                     <span>Total:</span>
                                     <span id="inv-total">₦0</span>
@@ -7164,6 +7192,25 @@
                             </div>
                             
                             <div class="form-group"><label class="form-label">Due Date</label><input type="date" class="form-input" id="inv-due"></div>
+                            
+                            <!-- Shipping/Delivery -->
+                            <div class="form-group">
+                                <label class="form-label" style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+                                    <input type="checkbox" id="inv-shipping-toggle" style="width:18px;height:18px;"> Add Shipping/Delivery Fee
+                                </label>
+                                <div id="inv-shipping-fields" style="display:none;margin-top:8px;">
+                                    <div style="display:flex;gap:8px;">
+                                        <input type="text" class="form-input" id="inv-shipping-desc" placeholder="e.g. Delivery to Lagos" style="flex:2;">
+                                        <input type="number" class="form-input" id="inv-shipping-amount" placeholder="Amount" style="flex:1;">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Notes -->
+                            <div class="form-group">
+                                <label class="form-label">Notes (optional)</label>
+                                <textarea class="form-input" id="inv-notes" rows="2" placeholder="Payment instructions, thank you message, etc." style="resize:none;"></textarea>
+                            </div>
                         </div>
                         <div class="modal-footer">
                             <button class="btn btn-secondary" id="modal-cancel">Cancel</button>
@@ -7180,6 +7227,13 @@
             document.getElementById('inv-discount')?.addEventListener('input', updateTotal);
             document.getElementById('inv-discount-type')?.addEventListener('change', updateTotal);
             document.getElementById('inv-vat')?.addEventListener('change', updateTotal);
+            
+            // Shipping toggle
+            document.getElementById('inv-shipping-toggle')?.addEventListener('change', (e) => {
+                document.getElementById('inv-shipping-fields').style.display = e.target.checked ? 'block' : 'none';
+                updateTotal();
+            });
+            document.getElementById('inv-shipping-amount')?.addEventListener('input', updateTotal);
             
             // Add item button
             document.getElementById('btn-add-item').onclick = () => {
@@ -7257,7 +7311,12 @@
                 const includeVat = document.getElementById('inv-vat')?.checked;
                 const vatAmount = includeVat ? afterDiscount * 0.075 : 0;
                 
-                const total = afterDiscount + vatAmount;
+                // Shipping
+                const includeShipping = document.getElementById('inv-shipping-toggle')?.checked;
+                const shippingAmount = includeShipping ? (parseFloat(document.getElementById('inv-shipping-amount')?.value) || 0) : 0;
+                const shippingDesc = document.getElementById('inv-shipping-desc')?.value?.trim() || 'Shipping';
+                
+                const total = afterDiscount + vatAmount + shippingAmount;
                 
                 // Update display
                 document.getElementById('inv-subtotal').textContent = formatNaira(subtotal);
@@ -7265,6 +7324,9 @@
                 document.getElementById('inv-discount-amount').textContent = '-' + formatNaira(discountAmount);
                 document.getElementById('inv-vat-row').style.display = includeVat ? 'flex' : 'none';
                 document.getElementById('inv-vat-amount').textContent = formatNaira(vatAmount);
+                document.getElementById('inv-shipping-row').style.display = shippingAmount > 0 ? 'flex' : 'none';
+                document.getElementById('inv-shipping-label').textContent = shippingDesc + ':';
+                document.getElementById('inv-shipping-display').textContent = formatNaira(shippingAmount);
                 document.getElementById('inv-total').textContent = formatNaira(total);
             }
             
@@ -7304,7 +7366,15 @@
                 const includeVat = document.getElementById('inv-vat')?.checked;
                 const vatAmount = includeVat ? afterDiscount * 0.075 : 0;
                 
-                const total = afterDiscount + vatAmount;
+                // Shipping
+                const includeShipping = document.getElementById('inv-shipping-toggle')?.checked;
+                const shippingDesc = document.getElementById('inv-shipping-desc')?.value?.trim() || 'Shipping/Delivery';
+                const shippingAmount = includeShipping ? (parseFloat(document.getElementById('inv-shipping-amount')?.value) || 0) : 0;
+                
+                // Notes
+                const notes = document.getElementById('inv-notes')?.value?.trim() || '';
+                
+                const total = afterDiscount + vatAmount + shippingAmount;
                 
                 try { 
                     await addInvoiceWithDetails(cust, desc, total, due, items, {
@@ -7313,7 +7383,10 @@
                         discountValue,
                         discountType,
                         vat: vatAmount,
-                        includeVat
+                        includeVat,
+                        shipping: shippingAmount,
+                        shippingDesc: includeShipping ? shippingDesc : null,
+                        notes
                     }); 
                     const newInvNumber = state.invoices[0].invoice_number;
                     closeModal(); 
@@ -7325,25 +7398,63 @@
         
         async function addInvoiceWithDetails(customerId, description, amount, dueDate, items, details) {
             const invoiceNumber = 'INV-' + String(state.invoices.length + 1).padStart(4, '0');
-            const invoice = {
-                id: 'inv-' + Date.now(),
+            
+            // Prepare invoice for Supabase
+            const invoiceData = {
                 invoice_number: invoiceNumber,
                 customer_id: customerId,
                 description,
-                items,
-                amount,
+                items: items,
+                amount: amount,
                 amount_paid: 0,
                 subtotal: details.subtotal,
-                discount: details.discount,
-                discount_value: details.discountValue,
-                discount_type: details.discountType,
-                vat: details.vat,
-                include_vat: details.includeVat,
-                due_date: dueDate,
-                created_at: new Date().toISOString()
+                discount: details.discount || 0,
+                discount_type: details.discountType || 'percent',
+                vat: details.vat || 0,
+                include_vat: details.includeVat || false,
+                shipping_amount: details.shipping || 0,
+                shipping_desc: details.shippingDesc || null,
+                notes: details.notes || '',
+                due_date: dueDate
             };
-            state.invoices.unshift(invoice);
-            localStorage.setItem('owomi_invoices', JSON.stringify(state.invoices));
+            
+            try {
+                // Save to Supabase
+                const created = await db.createInvoice(invoiceData);
+                
+                if (created) {
+                    // Add to state with returned ID
+                    state.invoices.unshift({
+                        id: created.id,
+                        invoice_number: created.invoice_number,
+                        customer_id: created.customer_id,
+                        description: created.description,
+                        items: created.items || items,
+                        amount: parseFloat(created.amount) || amount,
+                        amount_paid: parseFloat(created.amount_paid) || 0,
+                        subtotal: parseFloat(created.subtotal) || details.subtotal,
+                        discount: parseFloat(created.discount) || 0,
+                        discount_type: created.discount_type || 'percent',
+                        vat: parseFloat(created.vat) || 0,
+                        include_vat: created.include_vat || false,
+                        shipping: parseFloat(created.shipping_amount) || 0,
+                        shipping_desc: created.shipping_desc || null,
+                        notes: created.notes || '',
+                        due_date: created.due_date,
+                        created_at: created.created_at,
+                        viewed_at: null
+                    });
+                    
+                    // Track usage for subscription limits
+                    await db.incrementUsage('invoice');
+                } else {
+                    throw new Error('Failed to create invoice');
+                }
+            } catch (err) {
+                console.error('Error creating invoice:', err);
+                showToast('Error saving invoice. Please try again.', 'error');
+                throw err;
+            }
         }
 
         function showPaymentModal(invoiceId) {
@@ -7571,6 +7682,16 @@
         function renderPortal() {
             const app = document.getElementById('app');
             app.innerHTML = renderCustomerPortal(state.portalCustomerId);
+            
+            // Mark all customer's invoices as viewed when they open the portal
+            const customerInvoices = state.invoices.filter(inv => inv.customer_id === state.portalCustomerId);
+            customerInvoices.forEach(inv => {
+                if (!inv.viewed_at) {
+                    inv.viewed_at = new Date().toISOString();
+                }
+            });
+            localStorage.setItem('owomi_invoices', JSON.stringify(state.invoices));
+            
             attachPortalEvents();
         }
         
@@ -7605,13 +7726,27 @@
             
             // View invoice buttons
             document.querySelectorAll('[data-portal-view]').forEach(btn => {
-                btn.onclick = () => generatePDF(btn.dataset.portalView);
+                btn.onclick = () => {
+                    const invoiceId = btn.dataset.portalView;
+                    // Mark as viewed
+                    markInvoiceViewed(invoiceId);
+                    generatePDF(invoiceId);
+                };
             });
             
             // Receipt buttons
             document.querySelectorAll('[data-portal-receipt]').forEach(btn => {
                 btn.onclick = () => generateReceipt(btn.dataset.portalReceipt);
             });
+        }
+        
+        function markInvoiceViewed(invoiceId) {
+            const inv = state.invoices.find(i => i.id === invoiceId);
+            if (inv && !inv.viewed_at) {
+                inv.viewed_at = new Date().toISOString();
+                localStorage.setItem('owomi_invoices', JSON.stringify(state.invoices));
+                // Could also sync to Supabase here for real-time tracking
+            }
         }
         
         function initiatePortalPayment(invoiceId, amount, isPayAll) {
@@ -8690,7 +8825,7 @@
             }
             
             // ============ WHO OWES / DEBTORS ============
-            if (qFixed.includes('owe') || qFixed.includes('debt') || qFixed.includes('outstanding') || qFixed.includes('unpaid')) {
+            if (qFixed.includes('owe') || qFixed.includes('owing') || qFixed.includes('debt') || qFixed.includes('outstanding') || qFixed.includes('unpaid') || qFixed.includes('most money') || qFixed.includes('more money')) {
                 const timeFilter = getTimeFilter();
                 
                 const debtors = state.customers.map(c => {
@@ -8713,6 +8848,17 @@
                 
                 const total = debtors.reduce((s, d) => s + d.owed, 0);
                 const timeLabel = timeFilter ? ` (${timeFilter.label})` : '';
+                
+                // Check if asking for top/most debtor specifically
+                if (qFixed.includes('most') || qFixed.includes('top') || qFixed.includes('biggest') || qFixed.includes('highest') || qFixed.includes('more')) {
+                    const top = debtors[0];
+                    lastAISuggestion = `Remind ${top.name}`;
+                    
+                    if (isPidgin) {
+                        return `🏆 ${top.name} na who dey owe you pass!\n\n💰 E dey owe: ₦${top.owed.toLocaleString()}\n📱 Phone: ${top.phone || 'No phone'}\n\nYou wan make I remind am? Talk "yes" 📱`;
+                    }
+                    return `🏆 ${top.name} owes you the most!\n\n💰 Amount: ₦${top.owed.toLocaleString()}\n📱 Phone: ${top.phone || 'No phone'}\n\nWant me to remind them? Say "yes" 📱`;
+                }
                 
                 // Set suggestion for "yes" response
                 lastAISuggestion = `Remind ${debtors[0].name}`;
@@ -9004,10 +9150,25 @@
                 <div class="total-row"><span>Subtotal</span><span>${formatNaira(inv.subtotal || inv.amount)}</span></div>
                 ${inv.discount > 0 ? `<div class="total-row"><span>Discount${inv.discount_type === 'percent' ? ` (${inv.discount_value}%)` : ''}</span><span style="color:#dc2626">-${formatNaira(inv.discount)}</span></div>` : ''}
                 ${inv.include_vat ? `<div class="total-row"><span>VAT (7.5%)</span><span>${formatNaira(inv.vat)}</span></div>` : ''}
+                ${inv.shipping > 0 ? `<div class="total-row"><span>${inv.shipping_desc || 'Shipping/Delivery'}</span><span>${formatNaira(inv.shipping)}</span></div>` : ''}
                 <div class="total-row"><span>Total</span><span>${formatNaira(inv.amount)}</span></div>
                 <div class="total-row"><span>Amount Paid</span><span style="color:#16a34a">-${formatNaira(inv.amount_paid)}</span></div>
                 <div class="total-row final"><span>Balance Due</span><span style="color:${inv.amount - inv.amount_paid > 0 ? '#dc2626' : '#16a34a'}">${formatNaira(inv.amount - inv.amount_paid)}</span></div>
             </div>
+            
+            ${inv.notes ? `
+            <div class="box" style="width:100%;margin-top:20px">
+                <h3>NOTES</h3>
+                <p style="white-space:pre-line">${inv.notes}</p>
+            </div>
+            ` : ''}
+            
+            ${p.termsAndConditions ? `
+            <div style="margin-top:20px;padding:15px;background:#f9f9f9;border-radius:8px;font-size:11px;color:#666;">
+                <strong>Terms & Conditions:</strong>
+                <p style="margin:8px 0 0;white-space:pre-line">${p.termsAndConditions}</p>
+            </div>
+            ` : ''}
             
             <div class="footer">
                 <p>${p.footerNote || 'Thank you for your business!'}</p>
@@ -9229,16 +9390,35 @@
 
         function sendWhatsApp(invoiceId) {
             const inv = state.invoices.find(i => i.id === invoiceId);
+            if (!inv) {
+                showToast('Invoice not found', 'error');
+                return;
+            }
             const cust = state.customers.find(c => c.id === inv.customer_id);
-            const p = state.businessProfile;
-            const owed = inv.amount - inv.amount_paid;
-            const invNumber = inv.invoice_number || `INV-${inv.id.slice(0, 8).toUpperCase()}`;
+            if (!cust) {
+                showToast('Customer not found', 'error');
+                return;
+            }
+            const p = state.businessProfile || {};
+            const owed = inv.amount - (inv.amount_paid || 0);
+            const invNumber = inv.invoice_number || `INV-${(inv.id || '').toString().slice(0, 8).toUpperCase()}`;
             const status = getStatus(inv);
-            let phone = cust?.phone?.replace(/\s/g, '') || '';
+            let phone = (cust.phone || '').replace(/\s/g, '');
             if (phone.startsWith('0')) phone = '234' + phone.slice(1);
             
             // Generate smart AI messages based on context
-            const messages = generateSmartMessages(inv, cust, p, owed, invNumber, status);
+            let messages;
+            try {
+                messages = generateSmartMessages(inv, cust, p, owed, invNumber, status);
+            } catch (err) {
+                console.error('Error generating messages:', err);
+                // Fallback to simple message
+                messages = [{
+                    label: '😊 Friendly Reminder',
+                    preview: `Hi ${cust.name}, just a reminder about your invoice...`,
+                    full: `Hi ${cust.name},\n\nJust a friendly reminder about Invoice ${invNumber} for ${formatNaira(owed)}.\n\nPlease let me know if you have any questions.\n\nThank you!`
+                }];
+            }
             
             // Show message selection modal
             document.getElementById('modal-container').innerHTML = `
@@ -10435,12 +10615,14 @@
         }
         
         async function saveTemplateSettings() {
-            // Save footer note with business profile
+            // Save footer note and terms with business profile
             state.businessProfile.footerNote = document.getElementById('set-footer')?.value.trim() || '';
+            state.businessProfile.termsAndConditions = document.getElementById('set-terms')?.value.trim() || '';
             
             try {
                 await db.updateBusiness({
                     footer_note: state.businessProfile.footerNote,
+                    terms_and_conditions: state.businessProfile.termsAndConditions,
                     invoice_color: state.invoiceTemplate.color,
                     invoice_style: state.invoiceTemplate.style
                 });
