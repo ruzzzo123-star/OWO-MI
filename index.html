@@ -7399,7 +7399,7 @@
         async function addInvoiceWithDetails(customerId, description, amount, dueDate, items, details) {
             const invoiceNumber = 'INV-' + String(state.invoices.length + 1).padStart(4, '0');
             
-            // Prepare invoice for Supabase
+            // Prepare invoice for Supabase - use exact column names from database
             const invoiceData = {
                 invoice_number: invoiceNumber,
                 customer_id: customerId,
@@ -7407,15 +7407,16 @@
                 items: items,
                 amount: amount,
                 amount_paid: 0,
-                subtotal: details.subtotal,
+                due_date: dueDate,
+                // These columns need to exist in database - run SQL migration first!
+                subtotal: details.subtotal || amount,
                 discount: details.discount || 0,
                 discount_type: details.discountType || 'percent',
-                vat: details.vat || 0,
+                vat_amount: details.vat || 0,
                 include_vat: details.includeVat || false,
                 shipping_amount: details.shipping || 0,
                 shipping_desc: details.shippingDesc || null,
-                notes: details.notes || '',
-                due_date: dueDate
+                notes: details.notes || ''
             };
             
             try {
@@ -7435,7 +7436,7 @@
                         subtotal: parseFloat(created.subtotal) || details.subtotal,
                         discount: parseFloat(created.discount) || 0,
                         discount_type: created.discount_type || 'percent',
-                        vat: parseFloat(created.vat) || 0,
+                        vat: parseFloat(created.vat_amount) || 0,
                         include_vat: created.include_vat || false,
                         shipping: parseFloat(created.shipping_amount) || 0,
                         shipping_desc: created.shipping_desc || null,
@@ -7452,7 +7453,7 @@
                 }
             } catch (err) {
                 console.error('Error creating invoice:', err);
-                showToast('Error saving invoice. Please try again.', 'error');
+                showToast('Error saving invoice: ' + (err.message || 'Database error'), 'error');
                 throw err;
             }
         }
@@ -10865,4 +10866,4 @@
         });
     </script>
 </body>
-</html>
+    </html>
